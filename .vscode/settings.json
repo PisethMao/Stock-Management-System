@@ -1,0 +1,10 @@
+{
+  "editor.fontLigatures": true,
+  "files.associations": {
+    "xstring": "cpp",
+    "string": "cpp",
+    "stdexcept": "cpp",
+    "iostream": "cpp"
+  },
+  "editor.fontFamily": "'Fira Code', Consolas, 'Courier New', monospace"
+}
