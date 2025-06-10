@@ -2,15 +2,10 @@
 #include <tabulate/table.hpp>
 #include "include/User.hpp"
 #include "include/Auth.hpp"
+#include "include/AdminMenu.hpp"
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
-#ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#undef byte
-#include <windows.h>
-#endif
 using namespace std;
 using namespace tabulate;
 void logo()
@@ -79,14 +74,13 @@ void exportUsersToExcel(const vector<User> &users)
 int main()
 {
     system("cls");
-    SetConsoleOutputCP(CP_UTF8);
     logo();
     vector<User> users = {
         User("Admin", "Admin123*#", Role::ADMIN),
         User("Piseth Mao", "Piseth123*#", Role::CUSTOMER),
-        User("Kompheak Yarn", "Kompheak123*#", Role::CUSTOMER),
-        User("Srey Chanchhay", "Chanchhay123*#", Role::CUSTOMER),
-        User("Reourn Manet", "Maneth123*#", Role::CUSTOMER),
+        User("Kompheak Yan", "Kompheak123*#", Role::CUSTOMER),
+        User("Chanchhay Srey", "Chanchhay123*#", Role::CUSTOMER),
+        User("Maneth Reourn", "Maneth123*#", Role::CUSTOMER),
         User("Minghong Som", "Minghong123*#", Role::CUSTOMER),
     };
     User *currentUser = nullptr;
@@ -95,10 +89,10 @@ int main()
         currentUser = login(users);
     }
     printUsersTable(users);
-    ;
     string message = "          Welcome, " + currentUser->getUsername() + "!        ";
     Table successTable;
     successTable.add_row({message});
+    successTable.add_row({"Press Enter to continue..."});
     successTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -108,6 +102,15 @@ int main()
         .border_right("|")
         .corner("+");
     cout << successTable << endl;
+    cin.get();
+    if (currentUser->getRole() == Role::ADMIN)
+    {
+        showAdminMenu();
+    }
+    else
+    {
+        cout << "Bong kompheak and chanchhay." << endl;
+    }
     exportUsersToExcel(users);
     delete currentUser;
     return 0;

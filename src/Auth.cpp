@@ -6,12 +6,6 @@
 #include <limits>
 #include <algorithm>
 #include <stdexcept>
-#ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#undef byte
-#include <windows.h>
-#endif
 using namespace std;
 using namespace tabulate;
 bool isStrongPassword(const string &password)
@@ -27,7 +21,6 @@ bool isStrongPassword(const string &password)
 }
 User *login(vector<User> &users)
 {
-    SetConsoleOutputCP(CP_UTF8);
     string username;
     string password;
     const User *foundUser = nullptr;

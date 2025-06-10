@@ -15,6 +15,7 @@ add_executable(StockManagementSystem
   main.cpp
   src/User.cpp
   src/Auth.cpp
+  src/AdminMenu.cpp
 )
 target_include_directories(StockManagementSystem PRIVATE include)
 target_link_libraries(StockManagementSystem PRIVATE xlnt)
