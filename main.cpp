@@ -3,6 +3,7 @@
 #include "include/User.hpp"
 #include "include/Auth.hpp"
 #include "include/AdminMenu.hpp"
+#include "include/CustomerMenu.hpp"
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
@@ -109,7 +110,7 @@ int main()
     }
     else
     {
-        cout << "Bong kompheak and chanchhay." << endl;
+        showCustomerMenu();
     }
     exportUsersToExcel(users);
     delete currentUser;
