@@ -4,7 +4,8 @@
     "xstring": "cpp",
     "string": "cpp",
     "stdexcept": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "istream": "cpp"
   },
   "editor.fontFamily": "'Fira Code', Consolas, 'Courier New', monospace"
 }
