@@ -1,2 +1,5 @@
 #pragma once
-void showAdminMenu();
+#include "StockManager.hpp"
+#include <iostream>
+using namespace std;
+void showAdminMenu(StockManager &stockManger);

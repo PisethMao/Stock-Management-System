@@ -20,6 +20,7 @@ add_executable(StockManagementSystem
   src/ViewProduct.cpp
   src/SearchProduct.cpp
   src/PressEnter.cpp
+  src/StockManager.cpp
 )
 target_include_directories(StockManagementSystem PRIVATE include)
 target_link_libraries(StockManagementSystem PRIVATE xlnt)
