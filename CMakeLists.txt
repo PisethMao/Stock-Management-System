@@ -16,6 +16,10 @@ add_executable(StockManagementSystem
   src/User.cpp
   src/Auth.cpp
   src/AdminMenu.cpp
+  src/CustomerMenu.cpp
+  src/ViewProduct.cpp
+  src/SearchProduct.cpp
+  src/PressEnter.cpp
   src/StockManager.cpp
 )
 target_include_directories(StockManagementSystem PRIVATE include)
