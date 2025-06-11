@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 using namespace std;
 inline string trim(const string &str)
 {
@@ -18,5 +19,5 @@ inline bool isValidUsername(const string &username)
             return false;
         }
     }
-    return true;
+    return !username.empty();
 }

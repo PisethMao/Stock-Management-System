@@ -19,6 +19,7 @@ bool isStrongPassword(const string &password)
                             { return ispunct(c); });
     return hasLower && hasUpper && hasDigit && hasSymbol;
 }
+void exportUsersToExcel(const std::vector<User> &users);
 User *login(vector<User> &users)
 {
     string username;
@@ -44,9 +45,9 @@ User *login(vector<User> &users)
             username = trim(username);
             if (!isValidUsername(username))
             {
-                Table loginTable;
-                loginTable.add_row({"Invalid username. Only letters and spaces are allowed."});
-                loginTable.format()
+                Table invalidTable;
+                invalidTable.add_row({"Invalid username. Only letters and spaces are allowed."});
+                invalidTable.format()
                     .font_align(FontAlign::center)
                     .font_style({FontStyle::bold})
                     .border_top("-")
@@ -54,7 +55,7 @@ User *login(vector<User> &users)
                     .border_left("|")
                     .border_right("|")
                     .corner("+");
-                cout << loginTable << endl;
+                cout << invalidTable << endl;
                 continue;
             }
             foundUser = nullptr;
@@ -75,9 +76,9 @@ User *login(vector<User> &users)
                     password = trim(password);
                     if (password.find(' ') != string::npos)
                     {
-                        Table loginTable;
-                        loginTable.add_row({"   Password should not contain spaces!     "});
-                        loginTable.format()
+                        Table passwordTable;
+                        passwordTable.add_row({"   Password should not contain spaces!     "});
+                        passwordTable.format()
                             .font_align(FontAlign::center)
                             .font_style({FontStyle::bold})
                             .border_top("-")
@@ -85,14 +86,14 @@ User *login(vector<User> &users)
                             .border_left("|")
                             .border_right("|")
                             .corner("+");
-                        cout << loginTable << endl;
+                        cout << passwordTable << endl;
                         continue;
                     }
                     if (foundUser->getPassword() != password)
                     {
-                        Table loginTable;
-                        loginTable.add_row({"       Wrong password. Please try again.!  "});
-                        loginTable.format()
+                        Table wrongTable;
+                        wrongTable.add_row({"       Wrong password. Please try again.!  "});
+                        wrongTable.format()
                             .font_align(FontAlign::center)
                             .font_style({FontStyle::bold})
                             .border_top("-")
@@ -100,7 +101,7 @@ User *login(vector<User> &users)
                             .border_left("|")
                             .border_right("|")
                             .corner("+");
-                        cout << loginTable << endl;
+                        cout << wrongTable << endl;
                         continue;
                     }
                     string message = "Login successful as " + roleToString(foundUser->getRole()) + "!";
@@ -120,16 +121,46 @@ User *login(vector<User> &users)
             }
             else
             {
-                while (true)
+                Table notFound;
+                notFound.add_row({"Username not found. Try again."});
+                notFound.format()
+                    .font_align(FontAlign::center)
+                    .font_style({FontStyle::bold})
+                    .border_top("-")
+                    .border_bottom("-")
+                    .border_left("|")
+                    .border_right("|")
+                    .corner("+");
+                cout << notFound << endl;
+                string choice;
+                cout << "Would you like to login this username? (yes/no): ";
+                getline(cin, choice);
+                transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
+                if (choice == "yes")
                 {
-                    cout << "Enter your password: ";
-                    getline(cin, password);
-                    password = trim(password);
-                    if (!isStrongPassword(password))
+                    while (true)
                     {
-                        Table loginTable;
-                        loginTable.add_row({"Weak password. Must include lowercase, uppercase, digit, and symbol."});
-                        loginTable.format()
+                        cout << "Enter your password: ";
+                        getline(cin, password);
+                        password = trim(password);
+                        if (!isStrongPassword(password))
+                        {
+                            Table weakTable;
+                            weakTable.add_row({"Weak password. Must include lowercase, uppercase, digit, and symbol."});
+                            weakTable.format()
+                                .font_align(FontAlign::center)
+                                .font_style({FontStyle::bold})
+                                .border_top("-")
+                                .border_bottom("-")
+                                .border_left("|")
+                                .border_right("|")
+                                .corner("+");
+                            cout << weakTable << endl;
+                            continue;
+                        }
+                        Table customerTable;
+                        customerTable.add_row({"       New customer login accepted.        "});
+                        customerTable.format()
                             .font_align(FontAlign::center)
                             .font_style({FontStyle::bold})
                             .border_top("-")
@@ -137,23 +168,12 @@ User *login(vector<User> &users)
                             .border_left("|")
                             .border_right("|")
                             .corner("+");
-                        cout << loginTable << endl;
-                        continue;
+                        cout << customerTable << endl;
+                        User newUser(username, password, Role::CUSTOMER);
+                        users.push_back(newUser);
+                        exportUsersToExcel(users);
+                        return new User(newUser);
                     }
-                    Table loginTable;
-                    loginTable.add_row({"       New customer login accepted.        "});
-                    loginTable.format()
-                        .font_align(FontAlign::center)
-                        .font_style({FontStyle::bold})
-                        .border_top("-")
-                        .border_bottom("-")
-                        .border_left("|")
-                        .border_right("|")
-                        .corner("+");
-                    cout << loginTable << endl;
-                    User newUser(username, password, Role::CUSTOMER);
-                    users.push_back(newUser);
-                    return new User(newUser);
                 }
             }
         }

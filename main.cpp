@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
+#include <filesystem>
 using namespace std;
 using namespace tabulate;
 void logo()
@@ -35,6 +36,26 @@ void printUsersTable(const vector<User> &users)
         .corner("+");
     cout << userTable << endl;
 }
+void loadUsersFromExcel(vector<User> &users)
+{
+    users.clear();
+    string filename = "Users.xlsx";
+    if (!filesystem::exists(filename))
+        return;
+    xlnt::workbook wb;
+    wb.load(filename);
+    auto ws = wb.active_sheet();
+    for (auto row : ws.rows(false))
+    {
+        if (row[0].row() == 1)
+            continue;
+        string username = row[1].to_string();
+        string password = row[2].to_string();
+        string roleStr = row[3].to_string();
+        Role role = (roleStr == "Admin") ? Role::ADMIN : Role::CUSTOMER;
+        users.emplace_back(username, password, role);
+    }
+}
 void exportUsersToExcel(const vector<User> &users)
 {
     xlnt::workbook wb;
@@ -42,47 +63,49 @@ void exportUsersToExcel(const vector<User> &users)
     ws.title("Users");
     ws.cell("A1").value("No.");
     ws.cell("B1").value("Username");
-    ws.cell("C1").value("Role");
-    ws.cell("A1").font(xlnt::font().bold(true));
-    ws.cell("B1").font(xlnt::font().bold(true));
-    ws.cell("C1").font(xlnt::font().bold(true));
-    ws.cell("A1").alignment(xlnt::alignment()
-                                .horizontal(xlnt::horizontal_alignment::center)
-                                .vertical(xlnt::vertical_alignment::center));
-    ws.cell("B1").alignment(xlnt::alignment()
-                                .horizontal(xlnt::horizontal_alignment::center)
-                                .vertical(xlnt::vertical_alignment::center));
-    ws.cell("C1").alignment(xlnt::alignment()
-                                .horizontal(xlnt::horizontal_alignment::center)
-                                .vertical(xlnt::vertical_alignment::center));
+    ws.cell("C1").value("Password");
+    ws.cell("D1").value("Role");
+    for (char col : {'A', 'B', 'C', 'D'})
+    {
+        ws.cell(string(1, col) + "1").font(xlnt::font().bold(true));
+        ws.cell(string(1, col) + "1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center).vertical(xlnt::vertical_alignment::center));
+    }
     for (size_t i = 0; i < users.size(); ++i)
     {
         int row = static_cast<int>(i + 2);
         ws.cell("A" + to_string(row)).value(static_cast<int>(i + 1));
         ws.cell("B" + to_string(row)).value(users[i].getUsername());
-        ws.cell("C" + to_string(row)).value(roleToString(users[i].getRole()));
-        ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center).vertical(xlnt::vertical_alignment::center));
-        ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left).vertical(xlnt::vertical_alignment::center));
-        ws.cell("C" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center).vertical(xlnt::vertical_alignment::center));
+        ws.cell("C" + to_string(row)).value(users[i].getPassword());
+        ws.cell("D" + to_string(row)).value(roleToString(users[i].getRole()));
+        ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
+        ws.cell("C" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("D" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     }
     ws.column_properties("A").width = 8;
     ws.column_properties("B").width = 25;
     ws.column_properties("C").width = 15;
-    string filepath = "Users.xlsx";
-    wb.save(filepath);
+    ws.column_properties("D").width = 25;
+    wb.save("Users.xlsx");
 }
 int main()
 {
     system("cls");
     logo();
-    vector<User> users = {
-        User("Admin", "Admin123*#", Role::ADMIN),
-        User("Piseth Mao", "Piseth123*#", Role::CUSTOMER),
-        User("Kompheak Yan", "Kompheak123*#", Role::CUSTOMER),
-        User("Chanchhay Srey", "Chanchhay123*#", Role::CUSTOMER),
-        User("Maneth Reourn", "Maneth123*#", Role::CUSTOMER),
-        User("Minghong Som", "Minghong123*#", Role::CUSTOMER),
-    };
+    vector<User> users;
+    loadUsersFromExcel(users);
+    if (users.empty())
+    {
+        users = {
+            User("Admin", "Admin123#*", Role::ADMIN),
+            User("Piseth Mao", "Piseth123#*", Role::CUSTOMER),
+            User("Kompheak Yan", "Kompheak123#*", Role::CUSTOMER),
+            User("Chanchhay Srey", "Chanchhay123#*", Role::CUSTOMER),
+            User("Maneth Reourn", "Maneth123#*", Role::CUSTOMER),
+            User("Minghong Som", "Minghong123#*", Role::CUSTOMER),
+        };
+        exportUsersToExcel(users);
+    }
     User *currentUser = nullptr;
     while (currentUser == nullptr)
     {
@@ -103,15 +126,15 @@ int main()
         .corner("+");
     cout << successTable << endl;
     cin.get();
+    StockManager stockManager;
     if (currentUser->getRole() == Role::ADMIN)
     {
-        showAdminMenu();
+        showAdminMenu(stockManager);
     }
     else
     {
         cout << "Bong kompheak and chanchhay." << endl;
     }
-    exportUsersToExcel(users);
     delete currentUser;
     return 0;
 }
