@@ -1,7 +1,9 @@
-#pragma once
-#include <iostream>
-#include <algorithm>
-#include <string>
-using namespace std;
+// #pragma once
+// #include <iostream>
+// #include <algorithm>
+// #include <string>
+// using namespace std;
 
-void searchProduct();
+// void searchProductByName();
+// void searchProductById();
+// void searchOption();

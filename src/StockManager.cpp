@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <stdexcept>
 #include <iomanip>
+#include <locale>
+#include <cctype>
 using namespace std;
 using namespace tabulate;
 int StockManager::nextId = 1;
@@ -20,6 +22,11 @@ StockManager::StockManager()
         loadSampleData();
     }
     loadDataFromFile();
+    if (items.empty())
+    {
+        cout << "Warning: Excel file loaded 0 items. Using sample data instead." << endl;
+        loadSampleData();
+    }
     int maxId = 0;
     for (const auto &item : items)
     {
@@ -30,34 +37,47 @@ StockManager::StockManager()
 }
 bool isValidNameOrOrigin(const string &str)
 {
+    if (str.empty())
+        return false;
     for (char c : str)
     {
         if (!isalpha(c) && !isspace(c))
             return false;
     }
-    return !str.empty();
-}
-bool isValidDateFormat(const string &date)
-{
-    if (date.length() != 10)
-        return false;
-    if (date[4] != '-' || date[7] != '-')
-        return false;
-    string yearStr = date.substr(0, 4);
-    string monthStr = date.substr(5, 2);
-    string dayStr = date.substr(8, 2);
-    if (!all_of(yearStr.begin(), yearStr.end(), ::isdigit) ||
-        !all_of(monthStr.begin(), monthStr.end(), ::isdigit) ||
-        !all_of(dayStr.begin(), dayStr.end(), ::isdigit))
-    {
-        return false;
-    }
-    int year = stoi(yearStr);
-    int month = stoi(monthStr);
-    int day = stoi(dayStr);
-    if (month < 1 || month > 12 || day < 1 || day > 31)
-        return false;
     return true;
+}
+bool isValidModel(const string &str)
+{
+    if (str.empty())
+        return false;
+    for (char c : str)
+    {
+        if (!isalpha(c) && !isspace(c) && !isalnum(c))
+            return false;
+    }
+    return true;
+}
+string formatPrice(double price)
+{
+    stringstream ss;
+    ss << fixed << setprecision(2) << price;
+    string s = ss.str();
+    size_t dot_pos = s.find('.');
+    string int_part = s.substr(0, dot_pos);
+    string dec_part = s.substr(dot_pos);
+    string result;
+    int count = 0;
+    for (int i = static_cast<int>(int_part.size()) - 1; i >= 0; --i)
+    {
+        result.insert(0, 1, int_part[i]);
+        count++;
+        if (count == 3 && i != 0)
+        {
+            result.insert(0, 1, ',');
+            count = 0;
+        }
+    }
+    return "$ " + result + dec_part;
 }
 void StockManager::loadSampleData()
 {
@@ -81,12 +101,13 @@ void StockManager::loadSampleData()
     xlnt::worksheet ws = wb.active_sheet();
     ws.title("Stock");
     ws.cell("A1").value("ID");
-    ws.cell("B1").value("Name");
-    ws.cell("C1").value("Price");
-    ws.cell("D1").value("Year");
-    ws.cell("E1").value("Deadline");
+    ws.cell("B1").value("Type");
+    ws.cell("C1").value("Brand");
+    ws.cell("D1").value("Model");
+    ws.cell("E1").value("Year");
     ws.cell("F1").value("Origin");
-    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1"};
+    ws.cell("G1").value("Price");
+    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1"};
     for (const auto &cell : headers)
     {
         ws.cell(cell).alignment(
@@ -96,35 +117,39 @@ void StockManager::loadSampleData()
         ws.cell(cell).font(xlnt::font().bold(true));
     }
     vector<StockItem> samples = {
-        {1, "Laptop", 1200.0, 2023, "2025-12-31", "USA"},
-        {2, "Smartphone", 1600.0, 2022, "2025-08-15", "Spain"},
-        {3, "Charger", 900.0, 2024, "2024-07-01", "France"},
-        {4, "Mouse", 25.0, 2024, "2025-06-20", "Germany"},
-        {5, "Monitor", 1000.0, 2024, "2025-12-30", "UK"}};
+        {1, "Laptop", "Apple", "Macbook Pro M4 Max", 2025, "USA", 2599.00},
+        {2, "Laptop", "Lenovo", "ThinkPad X1 Carbon", 2025, "Japan", 2599.00},
+        {3, "Smart Phone", "Apple", "iPhone 16 Pro Max", 2025, "USA", 1459.00},
+        {4, "Smart Phone", "Samsung", "Galaxy S25 Ultra", 2025, "South Korea", 1259.00},
+        {5, "Laptop", "Apple", "Macbook Pro M4 Pro", 2025, "USA", 2299.99}};
     for (size_t i = 0; i < samples.size(); ++i)
     {
         int row = static_cast<int>(i + 2);
         const auto &item = samples[i];
         ws.cell("A" + to_string(row)).value(item.id);
-        ws.cell("B" + to_string(row)).value(item.name);
-        ws.cell("C" + to_string(row)).value(item.price);
-        ws.cell("C" + to_string(row)).number_format(string("$#,##0.00"));
-        ws.cell("D" + to_string(row)).value(item.year);
-        ws.cell("E" + to_string(row)).value(item.deadline);
+        ws.cell("B" + to_string(row)).value(item.type);
+        ws.cell("C" + to_string(row)).value(item.brand);
+        ws.cell("D" + to_string(row)).value(item.model);
+        ws.cell("E" + to_string(row)).value(to_string(item.year));
+        ws.cell("E" + to_string(row)).number_format(xlnt::number_format::text());
         ws.cell("F" + to_string(row)).value(item.origin);
+        ws.cell("G" + to_string(row)).value(formatPrice(item.price));
         ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
         ws.cell("C" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
-        ws.cell("D" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("D" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
         ws.cell("E" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("F" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("G" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     }
     ws.column_properties("A").width = 5;
     ws.column_properties("B").width = 20;
     ws.column_properties("C").width = 12;
-    ws.column_properties("D").width = 10;
-    ws.column_properties("E").width = 18;
+    ws.column_properties("D").width = 40;
+    ws.column_properties("E").width = 15;
     ws.column_properties("F").width = 15;
+    ws.column_properties("G").width = 15;
+    this->items = samples;
     wb.save(filename);
 }
 void StockManager::loadDataFromFile()
@@ -138,7 +163,6 @@ void StockManager::loadDataFromFile()
         xlnt::workbook wb;
         wb.load(filename);
         auto ws = wb.active_sheet();
-
         for (auto row : ws.rows(false))
         {
             if (row[0].row() == 1)
@@ -147,11 +171,15 @@ void StockManager::loadDataFromFile()
             try
             {
                 item.id = stoi(row[0].to_string());
-                item.name = row[1].to_string();
-                item.price = stod(row[2].to_string());
-                item.year = stoi(row[3].to_string());
-                item.deadline = row[4].to_string();
+                item.type = row[1].to_string();
+                item.brand = row[2].to_string();
+                item.model = row[3].to_string();
+                item.year = stoi(row[4].to_string());
                 item.origin = row[5].to_string();
+                string raw = row[6].to_string();
+                raw.erase(remove(raw.begin(), raw.end(), '$'), raw.end());
+                raw.erase(remove(raw.begin(), raw.end(), ','), raw.end());
+                item.price = stod(raw);
                 items.push_back(item);
             }
             catch (const std::invalid_argument &e)
@@ -176,12 +204,13 @@ void StockManager::saveDataToFile()
     xlnt::worksheet ws = wb.active_sheet();
     ws.title("Stock");
     ws.cell("A1").value("ID");
-    ws.cell("B1").value("Name");
-    ws.cell("C1").value("Price");
-    ws.cell("D1").value("Year");
-    ws.cell("E1").value("Deadline");
+    ws.cell("B1").value("Type");
+    ws.cell("C1").value("Brand");
+    ws.cell("D1").value("Model");
+    ws.cell("E1").value("Year");
     ws.cell("F1").value("Origin");
-    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1"};
+    ws.cell("G1").value("Price");
+    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1"};
     for (const auto &cell : headers)
     {
         ws.cell(cell).alignment(
@@ -194,32 +223,23 @@ void StockManager::saveDataToFile()
     for (const auto &item : items)
     {
         ws.cell("A" + to_string(row)).value(item.id);
-        ws.cell("B" + to_string(row)).value(item.name);
-        ws.cell("C" + to_string(row)).value(item.price);
-        ws.cell("D" + to_string(row)).value(item.year);
-        ws.cell("E" + to_string(row)).value(item.deadline);
+        ws.cell("B" + to_string(row)).value(item.type);
+        ws.cell("C" + to_string(row)).value(item.brand);
+        ws.cell("D" + to_string(row)).value(item.model);
+        ws.cell("E" + to_string(row)).value(to_string(item.year));
+        ws.cell("E" + to_string(row)).number_format(xlnt::number_format::text());
         ws.cell("F" + to_string(row)).value(item.origin);
+        ws.cell("G" + to_string(row)).value(formatPrice(item.price));
+        ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
+        ws.cell("C" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
+        ws.cell("D" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
+        ws.cell("E" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("F" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("G" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         row++;
     }
-    try
-    {
-        wb.save(filename);
-    }
-    catch (const xlnt::exception &e)
-    {
-        cerr << "Error saving stock.xlsx: " << e.what() << endl;
-        Table errorTable;
-        errorTable.add_row({"Error saving stock data to file."});
-        errorTable.format()
-            .font_align(FontAlign::center)
-            .font_style({FontStyle::bold})
-            .border_top("-")
-            .border_bottom("-")
-            .border_left("|")
-            .border_right("|")
-            .corner("+");
-        cout << errorTable << endl;
-    }
+    wb.save(filename);
 }
 void StockManager::createRecord()
 {
@@ -227,14 +247,99 @@ void StockManager::createRecord()
     item.id = nextId++;
     while (true)
     {
-        cout << "Enter product name: ";
-        getline(cin >> ws, item.name);
-        if (isValidNameOrOrigin(item.name))
+        cout << "Enter type of product: ";
+        getline(cin >> ws, item.type);
+        if (isValidNameOrOrigin(item.type))
             break;
         else
         {
             Table invalidTable;
-            invalidTable.add_row({"Invalid name! Only letters and spaces are allowed."});
+            invalidTable.add_row({"Invalid type! Only letters and spaces are allowed."});
+            invalidTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidTable << endl;
+        }
+    }
+    while (true)
+    {
+        cout << "Enter brand of product: ";
+        getline(cin >> ws, item.brand);
+        if (isValidNameOrOrigin(item.brand))
+            break;
+        else
+        {
+            Table invalidTable;
+            invalidTable.add_row({"Invalid brand! Only letters and spaces are allowed."});
+            invalidTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidTable << endl;
+        }
+    }
+    while (true)
+    {
+        cout << "Enter product model: ";
+        getline(cin >> ws, item.model);
+        if (isValidModel(item.model))
+            break;
+        else
+        {
+            Table invalidTable;
+            invalidTable.add_row({"Invalid model! Only letters and spaces are allowed."});
+            invalidTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidTable << endl;
+        }
+    }
+    while (true)
+    {
+        cout << "Enter product year manufactured: ";
+        if (cin >> item.year)
+            break;
+        else
+        {
+            Table invalidTable;
+            invalidTable.add_row({"Invalid year! Please enter a valid number (e.g., 2025)."});
+            invalidTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidTable << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+    while (true)
+    {
+        cout << "Enter country of product origin: ";
+        getline(cin >> ws, item.origin);
+        if (isValidNameOrOrigin(item.origin))
+            break;
+        else
+        {
+            Table invalidTable;
+            invalidTable.add_row({"Invalid origin! Only letters and spaces are allowed."});
             invalidTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -266,70 +371,6 @@ void StockManager::createRecord()
             cout << invalidTable << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-    }
-    while (true)
-    {
-        cout << "Enter product year manufactured: ";
-        if (cin >> item.year)
-            break;
-        else
-        {
-            Table invalidTable;
-            invalidTable.add_row({"Invalid year! Please enter a valid number (e.g., 2025)."});
-            invalidTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
-                .border_top("-")
-                .border_bottom("-")
-                .border_left("|")
-                .border_right("|")
-                .corner("+");
-            cout << invalidTable << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-    }
-    while (true)
-    {
-        cout << "Enter product deadline (e.g., YYYY-MM-DD): ";
-        getline(cin >> ws, item.deadline);
-        if (isValidDateFormat(item.deadline))
-            break;
-        else
-        {
-            Table invalidTable;
-            invalidTable.add_row({"Invalid date format! Please use YYYY-MM-DD."});
-            invalidTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
-                .border_top("-")
-                .border_bottom("-")
-                .border_left("|")
-                .border_right("|")
-                .corner("+");
-            cout << invalidTable << endl;
-        }
-    }
-    while (true)
-    {
-        cout << "Enter country of product origin: ";
-        getline(cin >> ws, item.origin);
-        if (isValidNameOrOrigin(item.origin))
-            break;
-        else
-        {
-            Table invalidTable;
-            invalidTable.add_row({"Invalid origin! Only letters and spaces are allowed."});
-            invalidTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
-                .border_top("-")
-                .border_bottom("-")
-                .border_left("|")
-                .border_right("|")
-                .corner("+");
-            cout << invalidTable << endl;
         }
     }
     items.push_back(item);
@@ -364,14 +405,17 @@ void StockManager::displayData()
         cout << stockTable << endl;
         return;
     }
+    locale current_locale("");
+    cout.imbue(current_locale);
     Table table;
-    table.add_row({"ID", "Name", "Price", "Year", "Deadline", "Origin"});
+    table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Price"});
     table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
     for (const auto &item : items)
     {
         stringstream ss_price;
+        ss_price.imbue(current_locale);
         ss_price << "$ " << fixed << setprecision(2) << item.price;
-        table.add_row({to_string(item.id), item.name, ss_price.str(), to_string(item.year), item.deadline, item.origin});
+        table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, ss_price.str()});
     }
     table.format()
         .border_top("-")

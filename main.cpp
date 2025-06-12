@@ -41,7 +41,7 @@ void printUsersTable(const vector<User> &users)
 void loadUsersFromExcel(vector<User> &users)
 {
     users.clear();
-    string filename = "Users.xlsx";
+    string filename = "users.xlsx";
     if (!filesystem::exists(filename))
         return;
     xlnt::workbook wb;
@@ -88,7 +88,7 @@ void exportUsersToExcel(const vector<User> &users)
     ws.column_properties("B").width = 25;
     ws.column_properties("C").width = 15;
     ws.column_properties("D").width = 25;
-    wb.save("Users.xlsx");
+    wb.save("users.xlsx");
 }
 int main()
 {
@@ -113,7 +113,10 @@ int main()
     {
         currentUser = login(users);
     }
-    printUsersTable(users);
+    if (currentUser->getRole() == Role::ADMIN)
+    {
+        printUsersTable(users);
+    }
     string message = "          Welcome, " + currentUser->getUsername() + "!        ";
     Table successTable;
     successTable.add_row({message});
@@ -135,7 +138,8 @@ int main()
     }
     else
     {
-        showCustomerMenu();
+        // showCustomerMenu();
+        cout << "Bong kompheak and chanchhay." << endl;
     }
     delete currentUser;
     return 0;

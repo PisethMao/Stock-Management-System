@@ -6,11 +6,12 @@ using namespace std;
 struct StockItem
 {
     int id;
-    string name;
-    double price;
+    string type;
+    string brand;
+    string model;
     int year;
-    string deadline;
     string origin;
+    double price;
 };
 class StockManager
 {
@@ -25,7 +26,13 @@ public:
     void saveDataToFile();
     void createRecord();
     void displayData();
-    // void searchAndFilter();
+    // void searchById(int id) const;
+    // void searchByType(const string &type) const;
+    // void searchByBrand(const string &brand) const;
+    // void searchByModel(const string &model) const;
+    // void filterByYear(int year) const;
+    // void filterByOrigin(const string &origin) const;
+    // void filterByPrice(double price) const;
     // void updateRecord();
     // void deleteRecord();
     // void insertStockItem();
