@@ -4,6 +4,7 @@
 #include "ViewProduct.hpp"
 #include "SearchProduct.hpp"
 #include "PressEnter.hpp"
+#include "Logout.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -45,6 +46,8 @@ void showCustomerMenu()
             searchProduct();
             waitForEnter();
             break;
+        case 5:
+            logout();
         default:
             break;
         }
