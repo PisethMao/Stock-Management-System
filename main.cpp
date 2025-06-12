@@ -138,7 +138,8 @@ int main()
     }
     else
     {
-        showCustomerMenu();
+        // showCustomerMenu();
+        cout << "Bong kompheak and chanchhay." << endl;
     }
     delete currentUser;
     return 0;
