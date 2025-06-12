@@ -53,6 +53,8 @@ void loadUsersFromExcel(vector<User> &users)
             continue;
         string username = row[1].to_string();
         string password = row[2].to_string();
+        if (password == "********" || password.empty())
+            continue;
         string roleStr = row[3].to_string();
         Role role = (roleStr == "Admin") ? Role::ADMIN : Role::CUSTOMER;
         users.emplace_back(username, password, role);
@@ -77,7 +79,7 @@ void exportUsersToExcel(const vector<User> &users)
         int row = static_cast<int>(i + 2);
         ws.cell("A" + to_string(row)).value(static_cast<int>(i + 1));
         ws.cell("B" + to_string(row)).value(users[i].getUsername());
-        ws.cell("C" + to_string(row)).value(users[i].getPassword());
+        ws.cell("C" + to_string(row)).value("********");
         ws.cell("D" + to_string(row)).value(roleToString(users[i].getRole()));
         ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
@@ -106,6 +108,11 @@ int main()
             User("Maneth Reourn", "Maneth123#*", Role::CUSTOMER),
             User("Minghong Som", "Minghong123#*", Role::CUSTOMER),
         };
+        unordered_map<string, string> passwordMap;
+        for (const auto &user : users)
+        {
+            passwordMap[user.getUsername()] = user.getPassword();
+        }
         exportUsersToExcel(users);
     }
     User *currentUser = nullptr;
