@@ -20,6 +20,7 @@ add_executable(StockManagementSystem
   src/ViewProduct.cpp
   src/SearchProduct.cpp
   src/StockManager.cpp
+  src/Logout.cpp
   src/SortFilter.cpp
 )
 target_include_directories(StockManagementSystem PRIVATE include)
