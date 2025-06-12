@@ -136,13 +136,13 @@ User *login(vector<User> &users)
                 cout << "Would you like to login this username? (yes/no): ";
                 getline(cin, choice);
                 transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
-                if (choice == "yes")
+                if (choice == "yes" || choice == "y")
                 {
                     while (true)
                     {
                         cout << "Enter your password: ";
                         getline(cin, password);
-                        password = trim(password);
+                        password = ::trim(password);
                         if (!isStrongPassword(password))
                         {
                             Table weakTable;
@@ -174,6 +174,22 @@ User *login(vector<User> &users)
                         exportUsersToExcel(users);
                         return new User(newUser);
                     }
+                }
+                else if (choice == "no" || choice == "n")
+                    continue;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid input. Please type yes or no."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
                 }
             }
         }
