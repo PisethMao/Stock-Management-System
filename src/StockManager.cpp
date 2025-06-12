@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include <locale>
+#include <cctype>
 using namespace std;
 using namespace tabulate;
 int StockManager::nextId = 1;
@@ -431,6 +432,34 @@ void StockManager::searchById(int id) const
     Table resultTable;
     resultTable.format()
         .font_align(FontAlign::center)
+// search feature
+void StockManager::searchProductByName(const std::string &keyword) const {
+    string searchKey = keyword;
+    transform(searchKey.begin(), searchKey.end(), searchKey.begin(), ::tolower);
+
+    Table table;
+    table.add_row({"ID", "Name", "Price", "Year", "Deadline", "Origin"});
+    bool found = false;
+
+    for (const auto &item : items) {
+        string nameLower = item.name;
+        transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+
+        if (nameLower.find(searchKey) != string::npos) {
+            table.add_row({
+                to_string(item.id),
+                item.name,
+                to_string(item.price),
+                to_string(item.year),
+                item.deadline,
+                item.origin
+            });
+            found = true;
+        }
+    }
+
+    table.format()
+        .font_align(FontAlign::left)
         .font_style({FontStyle::bold})
         .border_top("-")
         .border_bottom("-")
@@ -456,4 +485,46 @@ void StockManager::searchById(int id) const
         resultTable.add_row({"Item not found with ID: " + to_string(id)});
     }
     cout << resultTable << endl;
+
+    if (found) {
+        cout << "\n=== Search Results ===\n" << table << endl;
+    } else {
+        cout << "\n❌ No product found with name: " << keyword << endl;
+    }
+}
+
+void StockManager::searchProductById(int id) const {
+    Table table;
+    table.add_row({"ID", "Name", "Price", "Year", "Deadline", "Origin"});
+    bool found = false;
+
+    for (const auto &item : items) {
+        if (item.id == id) {
+            table.add_row({
+                to_string(item.id),
+                item.name,
+                to_string(item.price),
+                to_string(item.year),
+                item.deadline,
+                item.origin
+            });
+            found = true;
+            break;
+        }
+    }
+
+    table.format()
+        .font_align(FontAlign::left)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+
+    if (found) {
+        cout << "\n=== Search Result ===\n" << table << endl;
+    } else {
+        cout << "\nNo product found with ID: " << id << endl;
+    }
 }
