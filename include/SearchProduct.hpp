@@ -4,4 +4,6 @@
 #include <string>
 using namespace std;
 
-void searchProduct();
+void searchProductByName();
+void searchProductById();
+void searchOption();

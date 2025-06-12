@@ -3,6 +3,8 @@
 #include <vector>
 #include <iostream>
 using namespace std;
+
+
 struct StockItem
 {
     int id;
@@ -25,6 +27,14 @@ public:
     void saveDataToFile();
     void createRecord();
     void displayData();
+    void searchProductByName(const std::string &keyword) const;
+    void searchProductById(int id) const;
+    void sortProductsByIdASCD();
+    void sortProductsByIdDESC();
+    void sortProductsByNameASCD();
+    void sortProductsByNameDESC();
+    void sortProductsByPriceASCD();
+    void sortProductsByPriceDESC();
     // void searchAndFilter();
     // void updateRecord();
     // void deleteRecord();
@@ -32,4 +42,5 @@ public:
     // void sortRecord();
     // void logout();
     const vector<StockItem> &getItems() const { return items; }
+    vector<StockItem>& getItems() { return items; }
 };
