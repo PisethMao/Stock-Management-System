@@ -159,32 +159,31 @@ void showAdminMenu(StockManager &stockManager)
             case 1:
             {
                 int id;
-                while (true)
-                {
-                    cout << "Enter ID to search: ";
-                    if ((cin >> id) && id > 0)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        Table errorTable;
-                        errorTable.add_row({"Invalid ID! Please enter a positive number only."});
-                        errorTable.format()
-                            .font_align(FontAlign::center)
-                            .font_style({FontStyle::bold})
-                            .border_top("-")
-                            .border_bottom("-")
-                            .border_left("|")
-                            .border_right("|")
-                            .corner("+");
-                        cout << errorTable << endl;
-                        cin.clear();
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    }
-                }
-                // stockManager.loadDataFromFile();
-                stockManager.searchById(id);
+                // while (true)
+                // {
+                //     cout << "Enter ID to search: ";
+                //     if ((cin >> id) && id > 0)
+                //     {
+                //         break;
+                //     }
+                //     else
+                //     {
+                //         Table errorTable;
+                //         errorTable.add_row({"Invalid ID! Please enter a positive number only."});
+                //         errorTable.format()
+                //             .font_align(FontAlign::center)
+                //             .font_style({FontStyle::bold})
+                //             .border_top("-")
+                //             .border_bottom("-")
+                //             .border_left("|")
+                //             .border_right("|")
+                //             .corner("+");
+                //         cout << errorTable << endl;
+                //         cin.clear();
+                //         cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                //     }
+                // }
+                // stockManager.searchById(id);
                 break;
             }
             case 2:
