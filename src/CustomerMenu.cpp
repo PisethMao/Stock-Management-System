@@ -3,7 +3,8 @@
 #include "CustomerMenu.hpp"
 #include "ViewProduct.hpp"
 #include "SearchProduct.hpp"
-#include "PressEnter.hpp"
+#include "StockManager.hpp"
+#include "SortFilter.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -22,7 +23,7 @@ void showCustomerMenu()
         customerMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
         customerMenu.add_row({"1. View Available Products"});
         customerMenu.add_row({"2. Search Products"});
-        customerMenu.add_row({"3. Buy Products"});
+        customerMenu.add_row({"3. Sort/Filter Products"});
         customerMenu.add_row({"4. My Cart"});
         customerMenu.add_row({"5. Logout"});
         customerMenu.format()
@@ -39,13 +40,25 @@ void showCustomerMenu()
         {
         case 1:
             viewProducts();
-            waitForEnter();
             break;
         case 2:
-            searchProduct();
-            waitForEnter();
+            searchOption();
+            break;
+        case 3:
+            sortFilterMenu();
+            break;
+        case 4:
+            break;
+        case 5:
             break;
         default:
+            Table invalidTable;
+            invalidTable.add_row({"===Invalid Option Please Choose Again from [1-5]==="});
+            invalidTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+            cout << invalidTable << endl;
+            cout << "Press Enter to continue... ";
+            cin.ignore();
+            cin.get();
             break;
         }
     } while (choice != 5);
