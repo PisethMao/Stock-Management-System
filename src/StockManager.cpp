@@ -79,6 +79,17 @@ string formatPrice(double price)
     }
     return "$ " + result + dec_part;
 }
+void setColumnWidths(xlnt::worksheet &ws)
+{
+    ws.column_properties("A").width = 5;
+    ws.column_properties("B").width = 20;
+    ws.column_properties("C").width = 12;
+    ws.column_properties("D").width = 40;
+    ws.column_properties("E").width = 15;
+    ws.column_properties("F").width = 15;
+    ws.column_properties("G").width = 15;
+    ws.column_properties("G").width = 15;
+}
 void StockManager::loadSampleData()
 {
     string filename = "stock.xlsx";
@@ -106,8 +117,9 @@ void StockManager::loadSampleData()
     ws.cell("D1").value("Model");
     ws.cell("E1").value("Year");
     ws.cell("F1").value("Origin");
-    ws.cell("G1").value("Price");
-    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1"};
+    ws.cell("G1").value("Quantity");
+    ws.cell("H1").value("Price");
+    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"};
     for (const auto &cell : headers)
     {
         ws.cell(cell).alignment(
@@ -117,11 +129,11 @@ void StockManager::loadSampleData()
         ws.cell(cell).font(xlnt::font().bold(true));
     }
     vector<StockItem> samples = {
-        {1, "Laptop", "Apple", "Macbook Pro M4 Max", 2025, "USA", 2599.00},
-        {2, "Laptop", "Lenovo", "ThinkPad X1 Carbon", 2025, "Japan", 2599.00},
-        {3, "Smart Phone", "Apple", "iPhone 16 Pro Max", 2025, "USA", 1459.00},
-        {4, "Smart Phone", "Samsung", "Galaxy S25 Ultra", 2025, "South Korea", 1259.00},
-        {5, "Laptop", "Apple", "Macbook Pro M4 Pro", 2025, "USA", 2299.99}};
+        {1, "Laptop", "Apple", "Macbook Pro M4 Max", 2025, "USA", 2, 2599.00},
+        {2, "Laptop", "Lenovo", "ThinkPad X1 Carbon", 2025, "Japan", 3, 2599.00},
+        {3, "Smart Phone", "Apple", "iPhone 16 Pro Max", 2025, "USA", 5, 1459.00},
+        {4, "Smart Phone", "Samsung", "Galaxy S25 Ultra", 2025, "South Korea", 8, 1259.00},
+        {5, "Laptop", "Apple", "Macbook Pro M4 Pro", 2025, "USA", 12, 2299.99}};
     for (size_t i = 0; i < samples.size(); ++i)
     {
         int row = static_cast<int>(i + 2);
@@ -133,7 +145,8 @@ void StockManager::loadSampleData()
         ws.cell("E" + to_string(row)).value(to_string(item.year));
         ws.cell("E" + to_string(row)).number_format(xlnt::number_format::text());
         ws.cell("F" + to_string(row)).value(item.origin);
-        ws.cell("G" + to_string(row)).value(formatPrice(item.price));
+        ws.cell("G" + to_string(row)).value(to_string(item.quantity));
+        ws.cell("H" + to_string(row)).value(formatPrice(item.price));
         ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
         ws.cell("C" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
@@ -141,14 +154,9 @@ void StockManager::loadSampleData()
         ws.cell("E" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("F" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("G" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("H" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     }
-    ws.column_properties("A").width = 5;
-    ws.column_properties("B").width = 20;
-    ws.column_properties("C").width = 12;
-    ws.column_properties("D").width = 40;
-    ws.column_properties("E").width = 15;
-    ws.column_properties("F").width = 15;
-    ws.column_properties("G").width = 15;
+    setColumnWidths(ws);
     this->items = samples;
     wb.save(filename);
 }
@@ -176,7 +184,8 @@ void StockManager::loadDataFromFile()
                 item.model = row[3].to_string();
                 item.year = stoi(row[4].to_string());
                 item.origin = row[5].to_string();
-                string raw = row[6].to_string();
+                item.quantity = stoi(row[6].to_string());
+                string raw = row[7].to_string();
                 raw.erase(remove(raw.begin(), raw.end(), '$'), raw.end());
                 raw.erase(remove(raw.begin(), raw.end(), ','), raw.end());
                 item.price = stod(raw);
@@ -209,8 +218,9 @@ void StockManager::saveDataToFile()
     ws.cell("D1").value("Model");
     ws.cell("E1").value("Year");
     ws.cell("F1").value("Origin");
-    ws.cell("G1").value("Price");
-    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1"};
+    ws.cell("G1").value("Quantity");
+    ws.cell("H1").value("Price");
+    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"};
     for (const auto &cell : headers)
     {
         ws.cell(cell).alignment(
@@ -229,7 +239,8 @@ void StockManager::saveDataToFile()
         ws.cell("E" + to_string(row)).value(to_string(item.year));
         ws.cell("E" + to_string(row)).number_format(xlnt::number_format::text());
         ws.cell("F" + to_string(row)).value(item.origin);
-        ws.cell("G" + to_string(row)).value(formatPrice(item.price));
+        ws.cell("G" + to_string(row)).value(to_string(item.quantity));
+        ws.cell("H" + to_string(row)).value(formatPrice(item.price));
         ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
         ws.cell("C" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
@@ -237,8 +248,10 @@ void StockManager::saveDataToFile()
         ws.cell("E" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("F" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("G" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+        ws.cell("H" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         row++;
     }
+    setColumnWidths(ws);
     wb.save(filename);
 }
 void StockManager::createRecord()
@@ -311,7 +324,7 @@ void StockManager::createRecord()
     while (true)
     {
         cout << "Enter product year manufactured: ";
-        if (cin >> item.year)
+        if (cin >> item.year && item.year >= 1970 && item.year <= 2099)
             break;
         else
         {
@@ -353,8 +366,30 @@ void StockManager::createRecord()
     }
     while (true)
     {
+        cout << "Enter product quantity: ";
+        if (cin >> item.quantity)
+            break;
+        else
+        {
+            Table invalidTable;
+            invalidTable.add_row({"Invalid quantity! Please enter a valid number (e.g., 1)."});
+            invalidTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidTable << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+    while (true)
+    {
         cout << "Enter product price: ";
-        if (cin >> item.price)
+        if (cin >> item.price && item.price > 0)
             break;
         else
         {
@@ -408,14 +443,23 @@ void StockManager::displayData()
     locale current_locale("");
     cout.imbue(current_locale);
     Table table;
-    table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Price"});
+    table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
     table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
     for (const auto &item : items)
     {
         stringstream ss_price;
         ss_price.imbue(current_locale);
         ss_price << "$ " << fixed << setprecision(2) << item.price;
-        table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, ss_price.str()});
+        table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = table.size() - 1;
+        table[lastRow][0].format().font_align(FontAlign::center);
+        table[lastRow][1].format().font_align(FontAlign::left);
+        table[lastRow][2].format().font_align(FontAlign::left);
+        table[lastRow][3].format().font_align(FontAlign::left);
+        table[lastRow][4].format().font_align(FontAlign::center);
+        table[lastRow][5].format().font_align(FontAlign::center);
+        table[lastRow][6].format().font_align(FontAlign::center);
+        table[lastRow][7].format().font_align(FontAlign::center);
     }
     table.format()
         .border_top("-")
@@ -424,4 +468,644 @@ void StockManager::displayData()
         .border_right("|")
         .corner("+");
     cout << table << endl;
+}
+void StockManager::searchById(int id) const
+{
+    bool isFound = false;
+    for (const auto &item : items)
+    {
+        if (item.id == id)
+        {
+            Table result;
+            result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+            result.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << result << endl;
+            isFound = true;
+            break;
+        }
+    }
+    if (!isFound)
+    {
+        Table notFound;
+        notFound.add_row({"No item found with ID = " + to_string(id)});
+        notFound.format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        cout << notFound << endl;
+    }
+}
+void StockManager::searchByType(const string &type) const
+{
+    bool isFound = false;
+    Table result;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        if (item.type == type)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        result.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No records found with type: " + type});
+        notFound.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::searchByBrand(const string &brand) const
+{
+    bool isFound = false;
+    Table result;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        if (item.brand == brand)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        result.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No records found with brand: " + brand});
+        notFound.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::searchByModel(const string &model) const
+{
+    bool isFound = false;
+    Table result;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        if (item.model == model)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        result.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No records found with model: " + model});
+        notFound.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::filterByYear(int year) const
+{
+    Table result;
+    bool isFound = false;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    for (const auto &item : items)
+    {
+        if (item.year == year)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No items found for year: " + to_string(year)});
+        notFound.format()
+            .font_style({FontStyle::bold})
+            .font_align(FontAlign::center)
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::filterByOrigin(const string &origin) const
+{
+    Table result;
+    bool isFound = false;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    for (const auto &item : items)
+    {
+        if (item.origin == origin)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No items found for origin: " + origin});
+        notFound.format()
+            .font_style({FontStyle::bold})
+            .font_align(FontAlign::center)
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::filterByQuantity(int quantity) const
+{
+    Table result;
+    bool isFound = false;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    for (const auto &item : items)
+    {
+        if (item.quantity == quantity)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No items found with quantity: " + to_string(quantity)});
+        notFound.format()
+            .font_style({FontStyle::bold})
+            .font_align(FontAlign::center)
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::filterByPrice(double price) const
+{
+    Table result;
+    bool isFound = false;
+    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    for (const auto &item : items)
+    {
+        if (item.price == price)
+        {
+            isFound = true;
+            result.add_row({to_string(item.id),
+                            item.type,
+                            item.brand,
+                            item.model,
+                            to_string(item.year),
+                            item.origin,
+                            to_string(item.quantity),
+                            formatPrice(item.price)});
+            size_t lastRow = result.size() - 1;
+            result[lastRow][0].format().font_align(FontAlign::center);
+            result[lastRow][1].format().font_align(FontAlign::left);
+            result[lastRow][2].format().font_align(FontAlign::left);
+            result[lastRow][3].format().font_align(FontAlign::left);
+            result[lastRow][4].format().font_align(FontAlign::center);
+            result[lastRow][5].format().font_align(FontAlign::center);
+            result[lastRow][6].format().font_align(FontAlign::center);
+            result[lastRow][7].format().font_align(FontAlign::center);
+        }
+    }
+    if (isFound)
+    {
+        cout << result << endl;
+    }
+    else
+    {
+        Table notFound;
+        notFound.add_row({"No items found with price: " + formatPrice(price)});
+        notFound.format()
+            .font_style({FontStyle::bold})
+            .font_align(FontAlign::center)
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFound << endl;
+    }
+}
+void StockManager::updateRecord()
+{
+    int id;
+    bool isFound = false;
+    while (true)
+    {
+        cout << "Enter the ID of the record to update: ";
+        if ((cin >> id) && id > 0)
+        {
+            break;
+        }
+        else
+        {
+            Table errorTable;
+            errorTable.add_row({"Invalid ID! Please enter a positive number only."});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+    for (auto &item : items)
+    {
+        if (item.id == id)
+        {
+            isFound = true;
+            Table foundTable;
+            foundTable.add_row({"Updating record with ID: " + to_string(id)});
+            foundTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << foundTable << endl;
+            while (true)
+            {
+                cout << "Enter new Type (Laptop): ";
+                getline(cin >> ws, item.type);
+                if (isValidNameOrOrigin(item.type))
+                    break;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid type! Only letters and spaces are allowed."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                }
+            }
+            while (true)
+            {
+                cout << "Enter new Brand (Apple): ";
+                getline(cin, item.brand);
+                if (isValidNameOrOrigin(item.brand))
+                    break;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid brand! Only letters and spaces are allowed."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                }
+            }
+            while (true)
+            {
+                cout << "Enter new Model (Macbook Pro M4): ";
+                getline(cin, item.model);
+                if (isValidModel(item.model))
+                    break;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid model! Only letters and spaces are allowed."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                }
+            }
+            while (true)
+            {
+                cout << "Enter new year manufactured (2025): ";
+                if (cin >> item.year && item.year >= 1970 && item.year <= 2099)
+                {
+                    break;
+                }
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid year! Please enter a valid number (e.g., 2025)."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
+            while (true)
+            {
+                cout << "Enter new Origin (USA): ";
+                getline(cin >> ws, item.origin);
+                if (isValidNameOrOrigin(item.origin))
+                    break;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid origin! Only letters and spaces are allowed."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                }
+            }
+            while (true)
+            {
+                cout << "Enter product quantity: ";
+                if (cin >> item.quantity)
+                    break;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid quantity! Please enter a valid number (e.g., 1)."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
+            while (true)
+            {
+                cout << "Enter new Price ($ 1299.00): ";
+                if (cin >> item.price && item.price > 0)
+                    break;
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid price! Please enter a numeric value."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
+            Table successfullyTable;
+            successfullyTable.add_row({"Record updated successfully."});
+            successfullyTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << successfullyTable << endl;
+            saveDataToFile();
+            break;
+        }
+    }
+    if (!isFound)
+    {
+        Table notFoundTable;
+        notFoundTable.add_row({"Record with ID " + to_string(id) + " not found."});
+        notFoundTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFoundTable << endl;
+    }
 }
