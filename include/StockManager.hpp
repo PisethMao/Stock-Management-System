@@ -1,4 +1,5 @@
 #pragma once
+#include "User.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -18,6 +19,7 @@ class StockManager
 {
 private:
     vector<StockItem> items;
+    vector<User> users;
     static int nextId;
 
 public:
@@ -36,9 +38,27 @@ public:
     void filterByQuantity(int quatity) const;
     void filterByPrice(double price) const;
     void updateRecord();
-    // void deleteRecord();
-    // void insertStockItem();
-    // void sortRecord();
-    // void logout();
+    void deleteRecord();
+    void sortRecordByIdASC();
+    void sortRecordByIdDESC();
+    void sortRecordByTypeASC();
+    void sortRecordByTypeDESC();
+    void sortRecordByBrandASC();
+    void sortRecordByBrandDESC();
+    void sortRecordByModelASC();
+    void sortRecordByModelDESC();
+    void sortRecordByYearASC();
+    void sortRecordByYearDESC();
+    void sortRecordByOriginASC();
+    void sortRecordByOriginDESC();
+    void sortRecordByQuantityASC();
+    void sortRecordByQuantityDESC();
+    void sortRecordByPriceASC();
+    void sortRecordByPriceDESC();
+    void logout();
+    void viewAllCustomers(const vector<User> &users);
+    void deleteCustomer();
+    void setUsers(const vector<User> &newUsers);
     const vector<StockItem> &getItems() const { return items; }
+    const vector<User> &getUsers() const { return users; }
 };

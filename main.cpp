@@ -19,25 +19,6 @@ void logo()
     cout << "\t\t\t\t  \\ V  V /  __/ | (_  (_) | | | | | |  __/ | || (_)    ___) | |  | |___) |" << endl;
     cout << "\t\t\t\t   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/  |____/|_|  |_|____/ " << endl;
 }
-void printUsersTable(const vector<User> &users)
-{
-    Table userTable;
-    userTable.add_row({"No.", "Username", "Role"});
-    int index = 1;
-    for (const auto &user : users)
-    {
-        userTable.add_row({to_string(index++), user.getUsername(), roleToString(user.getRole())});
-    }
-    userTable.format()
-        .font_align(FontAlign::center)
-        .font_style({FontStyle::bold})
-        .border_top("-")
-        .border_bottom("-")
-        .border_left("|")
-        .border_right("|")
-        .corner("+");
-    cout << userTable << endl;
-}
 void loadUsersFromExcel(vector<User> &users)
 {
     users.clear();
@@ -47,15 +28,19 @@ void loadUsersFromExcel(vector<User> &users)
     xlnt::workbook wb;
     wb.load(filename);
     auto ws = wb.active_sheet();
+    int rowIndex = 0;
     for (auto row : ws.rows(false))
     {
-        if (row[0].row() == 1)
+        rowIndex++;
+        if (rowIndex == 1)
             continue;
         string username = row[1].to_string();
         string password = row[2].to_string();
-        if (password == "********" || password.empty())
-            continue;
         string roleStr = row[3].to_string();
+        if (password == "********")
+        {
+            continue;
+        }
         Role role = (roleStr == "Admin") ? Role::ADMIN : Role::CUSTOMER;
         users.emplace_back(username, password, role);
     }
@@ -94,60 +79,70 @@ void exportUsersToExcel(const vector<User> &users)
 }
 int main()
 {
-    system("cls");
-    logo();
-    vector<User> users;
-    loadUsersFromExcel(users);
-    if (users.empty())
+    unordered_map<string, string> passwordMap = {
+        {"Admin", "Admin123#*"},
+        {"Piseth Mao", "Piseth123#*"},
+        {"Kompheak Yan", "Kompheak123#*"},
+        {"Chanchhay Srey", "Chanchhay123#*"},
+        {"Maneth Reourn", "Maneth123#*"},
+        {"Minghong Som", "Minghong123#*"}};
+    bool isRunning = true;
+    while (isRunning)
     {
-        users = {
-            User("Admin", "Admin123#*", Role::ADMIN),
-            User("Piseth Mao", "Piseth123#*", Role::CUSTOMER),
-            User("Kompheak Yan", "Kompheak123#*", Role::CUSTOMER),
-            User("Chanchhay Srey", "Chanchhay123#*", Role::CUSTOMER),
-            User("Maneth Reourn", "Maneth123#*", Role::CUSTOMER),
-            User("Minghong Som", "Minghong123#*", Role::CUSTOMER),
-        };
-        unordered_map<string, string> passwordMap;
-        for (const auto &user : users)
+        system("cls");
+        logo();
+        vector<User> users;
+        loadUsersFromExcel(users);
+        for (auto &user : users)
         {
-            passwordMap[user.getUsername()] = user.getPassword();
+            if (passwordMap.count(user.getUsername()))
+            {
+                user.setPassword(passwordMap[user.getUsername()]);
+            }
         }
-        exportUsersToExcel(users);
+        if (users.empty())
+        {
+            users = {
+                User("Admin", "Admin123#*", Role::ADMIN),
+                User("Piseth Mao", "Piseth123#*", Role::CUSTOMER),
+                User("Kompheak Yan", "Kompheak123#*", Role::CUSTOMER),
+                User("Chanchhay Srey", "Chanchhay123#*", Role::CUSTOMER),
+                User("Maneth Reourn", "Maneth123#*", Role::CUSTOMER),
+                User("Minghong Som", "Minghong123#*", Role::CUSTOMER),
+            };
+            exportUsersToExcel(users);
+        }
+        StockManager stockManager;
+        stockManager.setUsers(users);
+        User *currentUser = nullptr;
+        while (currentUser == nullptr)
+        {
+            currentUser = login(users);
+        }
+        string message = "          Welcome, " + currentUser->getUsername() + "!        ";
+        Table successTable;
+        successTable.add_row({message});
+        successTable.add_row({"Press Enter to continue..."});
+        successTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << successTable << endl;
+        cin.get();
+        if (currentUser->getRole() == Role::ADMIN)
+        {
+            showAdminMenu(stockManager, isRunning);
+        }
+        else
+        {
+            // showCustomerMenu();
+            cout << "Bong kompheak and chanchhay." << endl;
+        }
+        delete currentUser;
     }
-    User *currentUser = nullptr;
-    while (currentUser == nullptr)
-    {
-        currentUser = login(users);
-    }
-    if (currentUser->getRole() == Role::ADMIN)
-    {
-        printUsersTable(users);
-    }
-    string message = "          Welcome, " + currentUser->getUsername() + "!        ";
-    Table successTable;
-    successTable.add_row({message});
-    successTable.add_row({"Press Enter to continue..."});
-    successTable.format()
-        .font_align(FontAlign::center)
-        .font_style({FontStyle::bold})
-        .border_top("-")
-        .border_bottom("-")
-        .border_left("|")
-        .border_right("|")
-        .corner("+");
-    cout << successTable << endl;
-    cin.get();
-    StockManager stockManager;
-    if (currentUser->getRole() == Role::ADMIN)
-    {
-        showAdminMenu(stockManager);
-    }
-    else
-    {
-        // showCustomerMenu();
-        cout << "Bong kompheak and chanchhay." << endl;
-    }
-    delete currentUser;
     return 0;
 }
