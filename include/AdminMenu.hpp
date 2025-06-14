@@ -3,3 +3,4 @@
 #include <iostream>
 using namespace std;
 void showAdminMenu(StockManager &stockManger);
+void pressEnter();
