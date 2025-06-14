@@ -41,4 +41,5 @@ public:
     // void sortRecord();
     // void logout();
     const vector<StockItem> &getItems() const { return items; }
+    vector<StockItem>& getItems() { return items; }
 };

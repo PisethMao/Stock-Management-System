@@ -3,8 +3,8 @@
 #include "include/User.hpp"
 #include "include/Auth.hpp"
 #include "include/AdminMenu.hpp"
-#include "include/CustomerMenu.hpp"
 #include "include/SearchProduct.hpp"
+#include "include/CustomerMenu.hpp"
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
@@ -145,8 +145,7 @@ int main()
     }
     else
     {
-        // showCustomerMenu();
-        cout << "Bong kompheak and chanchhay." << endl;
+        showCustomerMenu();
     }
     delete currentUser;
     return 0;
