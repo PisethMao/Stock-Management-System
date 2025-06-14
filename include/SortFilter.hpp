@@ -13,3 +13,7 @@ void sortProductsByModelASCD();
 void sortProductsByModelDESC();
 void sortProductsByPriceASCD();
 void sortProductsByPriceDESC();
+void sortProductsByBrandASCD();
+void sortProductsByBrandDESC();
+void sortProductsByYearASCD();
+void sortProductsByYearDESC();
