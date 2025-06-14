@@ -3,8 +3,8 @@
 #include "include/User.hpp"
 #include "include/Auth.hpp"
 #include "include/AdminMenu.hpp"
-#include "include/CustomerMenu.hpp"
 #include "include/SearchProduct.hpp"
+#include "include/CustomerMenu.hpp"
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
@@ -143,6 +143,39 @@ int main()
             cout << "Bong kompheak and chanchhay." << endl;
         }
         delete currentUser;
+        exportUsersToExcel(users);
+    }
+    User *currentUser = nullptr;
+    while (currentUser == nullptr)
+    {
+        currentUser = login(users);
+    }
+    if (currentUser->getRole() == Role::ADMIN)
+    {
+        printUsersTable(users);
+    }
+    string message = "          Welcome, " + currentUser->getUsername() + "!        ";
+    Table successTable;
+    successTable.add_row({message});
+    successTable.add_row({"Press Enter to continue..."});
+    successTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << successTable << endl;
+    cin.get();
+    StockManager stockManager;
+    if (currentUser->getRole() == Role::ADMIN)
+    {
+        showAdminMenu(stockManager);
+    }
+    else
+    {
+        showCustomerMenu();
     }
     return 0;
 }

@@ -1,9 +1,10 @@
-// #pragma once
-// #include <iostream>
-// #include <algorithm>
-// #include <string>
-// using namespace std;
+#pragma once
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include "StockManager.hpp"
+using namespace std;
 
 // void searchProductByName();
 // void searchProductById();
-// void searchOption();
+void searchOption(StockManager &stockManager);

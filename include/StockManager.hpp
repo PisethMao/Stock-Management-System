@@ -61,4 +61,5 @@ public:
     void setUsers(const vector<User> &newUsers);
     const vector<StockItem> &getItems() const { return items; }
     const vector<User> &getUsers() const { return users; }
+    vector<StockItem>& getItems() { return items; }
 };
