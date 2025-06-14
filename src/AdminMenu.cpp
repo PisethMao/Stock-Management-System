@@ -21,42 +21,65 @@ void pressEnter()
     cout << pressTable << endl;
     cin.get();
 }
-void showAdminMenu(StockManager &stockManager)
+void showAdminMenu(StockManager &stockManager, bool &isRunning)
 {
-    while (true)
+    bool isStayInMenu = true;
+    while (isStayInMenu)
     {
         system("cls");
         int choice;
-        Table adminMenu;
-        adminMenu.add_row({"Admin Panel - Stock Management System"});
-        adminMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-        adminMenu.add_row({"1. Create a new record"});
-        adminMenu.add_row({"2. Display table in data format"});
-        adminMenu.add_row({"3. Search/Filter data"});
-        adminMenu.add_row({"4. Update existing record"});
-        adminMenu.add_row({"5. Delete a record"});
-        adminMenu.add_row({"6. Insert Data"});
-        adminMenu.add_row({"7. Sort Data"});
-        adminMenu.add_row({"8. Logout"});
-        adminMenu.format()
+        Table menu;
+        menu.add_row({" Admin Panel - Stock Management System "});
+        menu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        menu.add_row({""});
+        menu[1].format().border_bottom("-");
+        auto addSection = [&](const vector<string> &items)
+        {
+            for (const auto &item : items)
+            {
+                menu.add_row({item});
+            }
+            menu.add_row({""});
+            menu[menu.size() - 1].format().border_bottom("-");
+        };
+        vector<string> productItems = {
+            "[ Product Management ]",
+            "1. Create a new record",
+            "2. Display table in data format",
+            "3. Search/Filter data",
+            "4. Update existing record",
+            "5. Delete a product record",
+            "6. Sort product data"};
+        vector<string> userItems = {
+            "[ User Management ]",
+            "7. View all customers",
+            "8. Delete a customer"};
+        vector<string> sessionItems = {
+            "[ Session ]",
+            "9. Logout",
+            "10. Exit the program"};
+        addSection(productItems);
+        addSection(userItems);
+        addSection(sessionItems);
+        menu.format()
             .font_align(FontAlign::left)
             .border_top("-")
             .border_bottom("-")
             .border_left("|")
             .border_right("|")
             .corner("+");
-        cout << adminMenu << endl;
+        cout << menu << endl;
         while (true)
         {
-            cout << "Choose your choice [1-8]: ";
-            if (cin >> choice && choice >= 1 && choice <= 8)
+            cout << "Choose your choice from [1-10]: ";
+            if (cin >> choice && choice >= 1 && choice <= 10)
             {
                 break;
             }
             else
             {
                 Table invalidTable;
-                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 8."});
+                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 10."});
                 invalidTable.format()
                     .font_align(FontAlign::center)
                     .font_style({FontStyle::bold})
@@ -135,7 +158,7 @@ void showAdminMenu(StockManager &stockManager)
                     .border_right("|")
                     .corner("+");
                 cout << searchAndFilterMenu << endl;
-                cout << "Choose an option [1-9]: ";
+                cout << "Choose an option from [1-9]: ";
                 if (!(cin >> subChoice) || subChoice < 1 || subChoice > 9)
                 {
                     Table invalidTable;
@@ -156,6 +179,7 @@ void showAdminMenu(StockManager &stockManager)
                 {
                 case 1:
                 {
+                    system("cls");
                     int id;
                     while (true)
                     {
@@ -188,6 +212,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 2:
                 {
+                    system("cls");
                     string type;
                     while (true)
                     {
@@ -227,6 +252,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 3:
                 {
+                    system("cls");
                     string brand;
                     while (true)
                     {
@@ -266,6 +292,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 4:
                 {
+                    system("cls");
                     string model;
                     while (true)
                     {
@@ -305,6 +332,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 5:
                 {
+                    system("cls");
                     int year;
                     while (true)
                     {
@@ -337,6 +365,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 6:
                 {
+                    system("cls");
                     string origin;
                     while (true)
                     {
@@ -376,6 +405,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 7:
                 {
+                    system("cls");
                     int quantity;
                     while (true)
                     {
@@ -408,6 +438,7 @@ void showAdminMenu(StockManager &stockManager)
                 }
                 case 8:
                 {
+                    system("cls");
                     double price;
                     while (true)
                     {
@@ -495,20 +526,325 @@ void showAdminMenu(StockManager &stockManager)
             pressEnter();
             break;
         }
-        // case 5:
-        //     stockManager.deleteRecord();
-        //     break;
-        // case 6:
-        //     stockManager.insertStockItem();
-        //     break;
-        // case 7:
-        //     stockManager.sortRecord();
-        //     break;
-        // case 8:
-        //     cout << "Logged out successfully." << endl;
-        //     break;
-        default:
+        case 5:
+        {
+            system("cls");
+            Table deleteTable;
+            deleteTable.add_row({"===============[ << Delete Records >> ]==============="});
+            deleteTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << deleteTable << endl;
+            stockManager.deleteRecord();
+            cin.ignore();
+            pressEnter();
             break;
+        }
+        case 6:
+        {
+            system("cls");
+            bool isStayInSortMenu = true;
+            while (isStayInSortMenu)
+            {
+                system("cls");
+                int subChoice;
+                Table sortMenu;
+                sortMenu.add_row({"===============[ << Sort Menu >> ]==============="});
+                sortMenu.add_row({"1. Sort Ascending by ID"});
+                sortMenu.add_row({"2. Sort Descending by ID"});
+                sortMenu.add_row({"3. Sort Ascending by Type"});
+                sortMenu.add_row({"4. Sort Descending by Type"});
+                sortMenu.add_row({"5. Sort Ascending by Brand"});
+                sortMenu.add_row({"6. Sort Descending by Brand"});
+                sortMenu.add_row({"7. Sort Ascending by Model"});
+                sortMenu.add_row({"8. Sort Descending by Model"});
+                sortMenu.add_row({"9. Sort Ascending by Year"});
+                sortMenu.add_row({"10. Sort Descending by Year"});
+                sortMenu.add_row({"11. Sort Ascending by Origin"});
+                sortMenu.add_row({"12. Sort Descending by Origin"});
+                sortMenu.add_row({"13. Sort Ascending by Quatity"});
+                sortMenu.add_row({"14. Sort Descending by Quatity"});
+                sortMenu.add_row({"15. Sort Ascending by Price"});
+                sortMenu.add_row({"16. Sort Descending by Price"});
+                sortMenu.add_row({"17. Exit Case Sort Menu"});
+                sortMenu.format()
+                    .font_align(FontAlign::left)
+                    .border_top("-")
+                    .border_bottom("-")
+                    .border_left("|")
+                    .border_right("|")
+                    .corner("+");
+                cout << sortMenu << endl;
+                cout << "Choose an option from [1-17]: ";
+                if (!(cin >> subChoice) || subChoice < 1 || subChoice > 17)
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"Invalid input! Please enter a number from 1 to 17."});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << invalidTable << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+                switch (subChoice)
+                {
+                case 1:
+                {
+                    system("cls");
+                    stockManager.sortRecordByIdASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 2:
+                {
+                    system("cls");
+                    stockManager.sortRecordByIdDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 3:
+                {
+                    system("cls");
+                    stockManager.sortRecordByTypeASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 4:
+                {
+                    system("cls");
+                    stockManager.sortRecordByTypeDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 5:
+                {
+                    system("cls");
+                    stockManager.sortRecordByBrandASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 6:
+                {
+                    system("cls");
+                    stockManager.sortRecordByBrandDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 7:
+                {
+                    system("cls");
+                    stockManager.sortRecordByModelASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 8:
+                {
+                    system("cls");
+                    stockManager.sortRecordByModelDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 9:
+                {
+                    system("cls");
+                    stockManager.sortRecordByYearASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 10:
+                {
+                    system("cls");
+                    stockManager.sortRecordByYearDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 11:
+                {
+                    system("cls");
+                    stockManager.sortRecordByOriginASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 12:
+                {
+                    system("cls");
+                    stockManager.sortRecordByOriginDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 13:
+                {
+                    system("cls");
+                    stockManager.sortRecordByQuantityASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 14:
+                {
+                    system("cls");
+                    stockManager.sortRecordByQuantityDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 15:
+                {
+                    system("cls");
+                    stockManager.sortRecordByPriceASC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 16:
+                {
+                    system("cls");
+                    stockManager.sortRecordByPriceDESC();
+                    cin.ignore();
+                    pressEnter();
+                    break;
+                }
+                case 17:
+                {
+                    Table exitTable;
+                    exitTable.add_row({"Exit the case sort menu."});
+                    exitTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << exitTable << endl;
+                    cin.ignore();
+                    pressEnter();
+                    isStayInSortMenu = false;
+                    break;
+                }
+                default:
+                {
+                    Table warningTable;
+                    warningTable.add_row({"Invalid choice! Please select an option from the menu."});
+                    warningTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << warningTable << endl;
+                    pressEnter();
+                    break;
+                }
+                }
+            }
+            break;
+        }
+        case 7:
+        {
+            system("cls");
+            Table viewUsersTable;
+            viewUsersTable.add_row({"===============[ << View All Customers Feature Placeholder >> ]==============="});
+            viewUsersTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << viewUsersTable << endl;
+            stockManager.viewAllCustomers(stockManager.getUsers());
+            cin.ignore();
+            pressEnter();
+            break;
+        }
+        case 8:
+        {
+            system("cls");
+            Table deleteUsersTable;
+            deleteUsersTable.add_row({"===============[ << Delete Customer Feature Placeholder >> ]==============="});
+            deleteUsersTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << deleteUsersTable << endl;
+            stockManager.deleteCustomer();
+            pressEnter();
+            break;
+        }
+        case 9:
+        {
+            stockManager.logout();
+            cin.ignore();
+            pressEnter();
+            isStayInMenu = false;
+            break;
+        }
+        case 10:
+        {
+            Table exitTable;
+            exitTable.add_row({"Exit the Program."});
+            exitTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << exitTable << endl;
+            cin.ignore();
+            pressEnter();
+            isRunning = false;
+            isStayInMenu = false;
+            break;
+        }
+        default:
+        {
+            Table warningTable;
+            warningTable.add_row({"Invalid choice! Please select an option from the menu."});
+            warningTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << warningTable << endl;
+            pressEnter();
+            break;
+        }
         }
     }
 }

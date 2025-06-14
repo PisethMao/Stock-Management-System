@@ -19,4 +19,8 @@ public:
     string getUsername() const;
     string getPassword() const;
     Role getRole() const;
+    void setPassword(const string &newPassword)
+    {
+        password = newPassword;
+    }
 };
