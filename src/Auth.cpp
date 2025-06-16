@@ -19,8 +19,8 @@ bool isStrongPassword(const string &password)
                             { return ispunct(c); });
     return hasLower && hasUpper && hasDigit && hasSymbol;
 }
-void exportUsersToExcel(const std::vector<User> &users);
-User *login(vector<User> &users)
+void exportUsersToExcel(const vector<User> &users);
+User *login(vector<User> &users, unordered_map<string, string> &passwordMap)
 {
     string username;
     string password;
@@ -133,21 +133,36 @@ User *login(vector<User> &users)
                     .corner("+");
                 cout << notFound << endl;
                 string choice;
-                cout << "Would you like to login this username? (yes/no): ";
-                getline(cin, choice);
-                transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
-                if (choice == "yes" || choice == "y")
+                while (true)
                 {
-                    while (true)
+                    cout << "Username not found. Do you want to create a new account with this username? (yes/no): ";
+                    getline(cin, choice);
+                    transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
+                    if (choice == "yes" || choice == "y")
                     {
-                        cout << "Enter your password: ";
-                        getline(cin, password);
-                        password = ::trim(password);
-                        if (!isStrongPassword(password))
+                        while (true)
                         {
-                            Table weakTable;
-                            weakTable.add_row({"Weak password. Must include lowercase, uppercase, digit, and symbol."});
-                            weakTable.format()
+                            cout << "Enter your password: ";
+                            getline(cin, password);
+                            password = ::trim(password);
+                            if (!isStrongPassword(password))
+                            {
+                                Table weakTable;
+                                weakTable.add_row({"Weak password. Must include lowercase, uppercase, digit, and symbol."});
+                                weakTable.format()
+                                    .font_align(FontAlign::center)
+                                    .font_style({FontStyle::bold})
+                                    .border_top("-")
+                                    .border_bottom("-")
+                                    .border_left("|")
+                                    .border_right("|")
+                                    .corner("+");
+                                cout << weakTable << endl;
+                                continue;
+                            }
+                            Table customerTable;
+                            customerTable.add_row({"       New customer login accepted.        "});
+                            customerTable.format()
                                 .font_align(FontAlign::center)
                                 .font_style({FontStyle::bold})
                                 .border_top("-")
@@ -155,12 +170,21 @@ User *login(vector<User> &users)
                                 .border_left("|")
                                 .border_right("|")
                                 .corner("+");
-                            cout << weakTable << endl;
-                            continue;
+                            cout << customerTable << endl;
+                            User newUser(username, password, Role::CUSTOMER);
+                            users.push_back(newUser);
+                            passwordMap[username] = password;
+                            exportUsersToExcel(users);
+                            return new User(newUser);
                         }
-                        Table customerTable;
-                        customerTable.add_row({"       New customer login accepted.        "});
-                        customerTable.format()
+                    }
+                    else if (choice == "no" || choice == "n")
+                        break;
+                    else
+                    {
+                        Table invalidTable;
+                        invalidTable.add_row({"Invalid input. Please type yes or no."});
+                        invalidTable.format()
                             .font_align(FontAlign::center)
                             .font_style({FontStyle::bold})
                             .border_top("-")
@@ -168,28 +192,8 @@ User *login(vector<User> &users)
                             .border_left("|")
                             .border_right("|")
                             .corner("+");
-                        cout << customerTable << endl;
-                        User newUser(username, password, Role::CUSTOMER);
-                        users.push_back(newUser);
-                        exportUsersToExcel(users);
-                        return new User(newUser);
+                        cout << invalidTable << endl;
                     }
-                }
-                else if (choice == "no" || choice == "n")
-                    continue;
-                else
-                {
-                    Table invalidTable;
-                    invalidTable.add_row({"Invalid input. Please type yes or no."});
-                    invalidTable.format()
-                        .font_align(FontAlign::center)
-                        .font_style({FontStyle::bold})
-                        .border_top("-")
-                        .border_bottom("-")
-                        .border_left("|")
-                        .border_right("|")
-                        .corner("+");
-                    cout << invalidTable << endl;
                 }
             }
         }

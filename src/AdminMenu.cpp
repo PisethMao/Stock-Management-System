@@ -4,6 +4,10 @@
 #include "StockManager.hpp"
 #include <iostream>
 #include <limits>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+#include <stdexcept>
 using namespace std;
 using namespace tabulate;
 void pressEnter()
@@ -21,7 +25,7 @@ void pressEnter()
     cout << pressTable << endl;
     cin.get();
 }
-void showAdminMenu(StockManager &stockManager, bool &isRunning)
+void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<string, string> &passwordMap)
 {
     bool isStayInMenu = true;
     while (isStayInMenu)
@@ -180,6 +184,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 1:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Search By ID >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     int id;
                     while (true)
                     {
@@ -213,6 +228,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 2:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Search By Type >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     string type;
                     while (true)
                     {
@@ -253,6 +279,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 3:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Search By Brand >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     string brand;
                     while (true)
                     {
@@ -293,6 +330,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 4:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Search By Model >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     string model;
                     while (true)
                     {
@@ -333,6 +381,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 5:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Filter By Year >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     int year;
                     while (true)
                     {
@@ -366,6 +425,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 6:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Filter By Origin >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     string origin;
                     while (true)
                     {
@@ -406,6 +476,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 7:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Filter By Quantity >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     int quantity;
                     while (true)
                     {
@@ -439,6 +520,17 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 case 8:
                 {
                     system("cls");
+                    Table displayTable;
+                    displayTable.add_row({"===============[ << Filter By Price >> ]==============="});
+                    displayTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << displayTable << endl;
                     double price;
                     while (true)
                     {
@@ -798,7 +890,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning)
                 .border_right("|")
                 .corner("+");
             cout << deleteUsersTable << endl;
-            stockManager.deleteCustomer();
+            stockManager.deleteCustomer(passwordMap);
             pressEnter();
             break;
         }

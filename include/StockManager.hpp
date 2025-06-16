@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 using namespace std;
 struct StockItem
 {
@@ -57,7 +58,7 @@ public:
     void sortRecordByPriceDESC();
     void logout();
     void viewAllCustomers(const vector<User> &users);
-    void deleteCustomer();
+    void deleteCustomer(unordered_map<string, string> &passwordMap);
     void setUsers(const vector<User> &newUsers);
     const vector<StockItem> &getItems() const { return items; }
     const vector<User> &getUsers() const { return users; }
