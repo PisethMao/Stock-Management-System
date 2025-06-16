@@ -5,6 +5,7 @@
 #include "SearchProduct.hpp"
 #include "StockManager.hpp"
 #include "SortFilter.hpp"
+#include "BuyProduct.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -24,7 +25,7 @@ void showCustomerMenu()
         customerMenu.add_row({"1. View Available Products"});
         customerMenu.add_row({"2. Search Products"});
         customerMenu.add_row({"3. Sort/Filter Products"});
-        customerMenu.add_row({"4. My Cart"});
+        customerMenu.add_row({"4. Buy Product"});
         customerMenu.add_row({"5. Logout"});
         customerMenu.format()
             .font_align(FontAlign::left)
@@ -51,7 +52,11 @@ void showCustomerMenu()
             sortFilterMenu();
             break;
         case 4:
-            break;
+        {
+            StockManager stockManager;
+            buyProduct(stockManager);
+        }
+        break;
         case 5:
             break;
         default:

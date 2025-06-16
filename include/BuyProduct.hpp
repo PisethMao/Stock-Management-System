@@ -1,0 +1,11 @@
+#pragma once
+#include "StockManager.hpp"
+#include <tabulate/table.hpp>
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+using namespace std;
+using namespace tabulate;
+
+// void pressEnterToContinue();
+void buyProduct(StockManager &stockManager);
