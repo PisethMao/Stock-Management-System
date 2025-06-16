@@ -1,6 +1,8 @@
 #define TABULATE_NO_STD_BYTE
 #include <tabulate/table.hpp>
 #include "StockManager.hpp"
+#include "StringUtils.hpp"
+#include "PasswordUtils.hpp"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -11,6 +13,7 @@
 #include <iomanip>
 #include <locale>
 #include <cctype>
+#include <regex>
 using namespace std;
 using namespace tabulate;
 int StockManager::nextId = 1;
@@ -90,6 +93,7 @@ void setColumnWidths(xlnt::worksheet &ws)
     ws.column_properties("G").width = 15;
     ws.column_properties("G").width = 15;
 }
+void exportUsersToExcel(const std::vector<User> &users);
 void StockManager::loadSampleData()
 {
     string filename = "stock.xlsx";
@@ -422,6 +426,20 @@ void StockManager::createRecord()
         .border_right("|")
         .corner("+");
     cout << validTable << endl;
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    Table pressTable;
+    pressTable.add_row({"Press Enter to continue..."});
+    pressTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << pressTable << endl;
+    cin.get();
 }
 void StockManager::displayData()
 {
@@ -1107,5 +1125,1116 @@ void StockManager::updateRecord()
             .border_right("|")
             .corner("+");
         cout << notFoundTable << endl;
+    }
+}
+void StockManager::deleteRecord()
+{
+    int id;
+    bool isFound = false;
+    while (true)
+    {
+        cout << "Enter the ID of the record to delete: ";
+        if ((cin >> id) && id > 0)
+        {
+            break;
+        }
+        else
+        {
+            Table errorTable;
+            errorTable.add_row({"Invalid ID! Please enter a positive number only."});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+        if (it->id == id)
+        {
+            isFound = true;
+            items.erase(it);
+            Table successTable;
+            successTable.add_row({"Record with ID " + to_string(id) + " deleted successfully."});
+            successTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << successTable << endl;
+            saveDataToFile();
+            break;
+        }
+    }
+    if (!isFound)
+    {
+        Table notFoundTable;
+        notFoundTable.add_row({"Record with ID " + to_string(id) + " not found."});
+        notFoundTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << notFoundTable << endl;
+    }
+}
+void StockManager::sortRecordByIdASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.id < b.id; });
+    Table message;
+    message.add_row({"Records sorted by ID in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByIdDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.id > b.id; });
+    Table message;
+    message.add_row({"Records sorted by ID in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByTypeASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.type < b.type; });
+    Table message;
+    message.add_row({"Records sorted by Type in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByTypeDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.type > b.type; });
+    Table message;
+    message.add_row({"Records sorted by Type in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByBrandASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.brand < b.brand; });
+    Table message;
+    message.add_row({"Records sorted by Brand in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByBrandDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.brand > b.brand; });
+    Table message;
+    message.add_row({"Records sorted by Brand in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByModelASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.model < b.model; });
+    Table message;
+    message.add_row({"Records sorted by Model in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByModelDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.model > b.model; });
+    Table message;
+    message.add_row({"Records sorted by Model in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByYearASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.year < b.year; });
+    Table message;
+    message.add_row({"Records sorted by Year in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByYearDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.year > b.year; });
+    Table message;
+    message.add_row({"Records sorted by Year in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByOriginASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.origin < b.origin; });
+    Table message;
+    message.add_row({"Records sorted by Origin in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByOriginDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.origin > b.origin; });
+    Table message;
+    message.add_row({"Records sorted by Origin in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByQuantityASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.quantity < b.quantity; });
+    Table message;
+    message.add_row({"Records sorted by Quantity in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByQuantityDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.quantity > b.quantity; });
+    Table message;
+    message.add_row({"Records sorted by Quantity in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByPriceASC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.price < b.price; });
+    Table message;
+    message.add_row({"Records sorted by Price in ascending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::sortRecordByPriceDESC()
+{
+    if (items.empty())
+    {
+        Table emptyTable;
+        emptyTable.add_row({"No stock data to sort. Load data or create new records."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
+    }
+    sort(items.begin(), items.end(), [](const StockItem &a, const StockItem &b)
+         { return a.price > b.price; });
+    Table message;
+    message.add_row({"Records sorted by Price in descending order."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+    Table sortedTable;
+    sortedTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+    sortedTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    for (const auto &item : items)
+    {
+        stringstream ss_price;
+        ss_price.imbue(locale(""));
+        ss_price << "$ " << fixed << setprecision(2) << item.price;
+        sortedTable.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        size_t lastRow = sortedTable.size() - 1;
+        sortedTable[lastRow][0].format().font_align(FontAlign::center);
+        sortedTable[lastRow][1].format().font_align(FontAlign::left);
+        sortedTable[lastRow][2].format().font_align(FontAlign::left);
+        sortedTable[lastRow][3].format().font_align(FontAlign::left);
+        sortedTable[lastRow][4].format().font_align(FontAlign::center);
+        sortedTable[lastRow][5].format().font_align(FontAlign::center);
+        sortedTable[lastRow][6].format().font_align(FontAlign::center);
+        sortedTable[lastRow][7].format().font_align(FontAlign::center);
+    }
+    sortedTable.format()
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << sortedTable << endl;
+}
+void StockManager::logout()
+{
+    Table message;
+    message.add_row({"You have been successfully logged out."});
+    message.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << message << endl;
+}
+void StockManager::viewAllCustomers(const vector<User> &users)
+{
+    Table table;
+    table.add_row({"No.", "Username", "Password"});
+    table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+    int index = 1;
+    for (const auto &user : users)
+    {
+        if (user.getRole() == Role::CUSTOMER)
+        {
+            table.add_row({
+                to_string(index++),
+                user.getUsername(),
+                "********",
+            });
+        }
+    }
+    table.format()
+        .font_align(FontAlign::center)
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    for (size_t i = 1; i < table.size(); ++i)
+    {
+        table[i][1].format().font_align(FontAlign::left);
+    }
+    cout << table << endl;
+}
+void StockManager::setUsers(const vector<User> &users)
+{
+    this->users = users;
+}
+void StockManager::deleteCustomer(unordered_map<string, string> &passwordMap)
+{
+    string usernameToDelete;
+    while (true)
+    {
+        cout << "| Enter the username to delete: ";
+        getline(cin >> ws, usernameToDelete);
+        usernameToDelete = trim(usernameToDelete);
+        if (!isValidUsername(usernameToDelete))
+        {
+            Table invalidInputTable;
+            invalidInputTable.add_row({"| Invalid input! Please enter letters only (no numbers or symbols)."});
+            invalidInputTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidInputTable << endl;
+        }else{
+            break;
+        }
+    }
+    auto it = find_if(users.begin(), users.end(), [&](const User &u)
+                      { return trim(u.getUsername()) == usernameToDelete && u.getRole() == Role::CUSTOMER; });
+    if (it != users.end())
+    {
+        string input;
+        char confirm;
+        while (true)
+        {
+            cout << "| Are you sure you want to delete this user? (y/n): ";
+            getline(cin, input);
+            if (input.length() == 1 && isalpha(input[0]))
+            {
+                confirm = tolower(input[0]);
+                if (confirm == 'y' || confirm == 'n')
+                    break;
+            }
+            Table invalidConfirm;
+            invalidConfirm.add_row({"| Invalid input! Please enter 'y' for yes or 'n' for no (no numbers or symbols)."});
+            invalidConfirm.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << invalidConfirm << endl;
+        }
+        if (confirm == 'y' || confirm == 'Y')
+        {
+            users.erase(it);
+            passwordMap.erase(usernameToDelete);
+            savePasswords(passwordMap);
+            Table deleteConfirmationTable;
+            deleteConfirmationTable.add_row({"| Successfully deleted customer: " + usernameToDelete});
+            deleteConfirmationTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << deleteConfirmationTable << endl;
+            exportUsersToExcel(users);
+        }
+    }
+    else
+    {
+        Table usernameNotFoundTable;
+        usernameNotFoundTable.add_row({"| Customer not found or not a customer role. Deletion canceled."});
+        usernameNotFoundTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << usernameNotFoundTable << endl;
     }
 }
