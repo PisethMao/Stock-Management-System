@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include<iostream>
+#include <unordered_map>
 using namespace std;
-User *login(vector<User> &users);
+User *login(vector<User> &users, unordered_map<string, string> &passwordMap);
 string roleToString(Role role);

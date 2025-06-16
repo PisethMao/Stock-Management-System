@@ -1,6 +1,8 @@
 #define TABULATE_NO_STD_BYTE
 #include <tabulate/table.hpp>
 #include "StockManager.hpp"
+#include "StringUtils.hpp"
+#include "PasswordUtils.hpp"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -424,6 +426,20 @@ void StockManager::createRecord()
         .border_right("|")
         .corner("+");
     cout << validTable << endl;
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    Table pressTable;
+    pressTable.add_row({"Press Enter to continue..."});
+    pressTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << pressTable << endl;
+    cin.get();
 }
 void StockManager::displayData()
 {
@@ -2135,19 +2151,15 @@ void StockManager::setUsers(const vector<User> &users)
 {
     this->users = users;
 }
-void StockManager::deleteCustomer()
+void StockManager::deleteCustomer(unordered_map<string, string> &passwordMap)
 {
     string usernameToDelete;
-    regex validUsername("^[A-Za-z]+( [A-Za-z]+)*$");
     while (true)
     {
         cout << "| Enter the username to delete: ";
         getline(cin >> ws, usernameToDelete);
-        if (regex_match(usernameToDelete, validUsername))
-        {
-            break;
-        }
-        else
+        usernameToDelete = trim(usernameToDelete);
+        if (!isValidUsername(usernameToDelete))
         {
             Table invalidInputTable;
             invalidInputTable.add_row({"| Invalid input! Please enter letters only (no numbers or symbols)."});
@@ -2160,10 +2172,12 @@ void StockManager::deleteCustomer()
                 .border_right("|")
                 .corner("+");
             cout << invalidInputTable << endl;
+        }else{
+            break;
         }
     }
     auto it = find_if(users.begin(), users.end(), [&](const User &u)
-                      { return u.getUsername() == usernameToDelete && u.getRole() == Role::CUSTOMER; });
+                      { return trim(u.getUsername()) == usernameToDelete && u.getRole() == Role::CUSTOMER; });
     if (it != users.end())
     {
         string input;
@@ -2171,7 +2185,7 @@ void StockManager::deleteCustomer()
         while (true)
         {
             cout << "| Are you sure you want to delete this user? (y/n): ";
-            getline(cin >> ws, input);
+            getline(cin, input);
             if (input.length() == 1 && isalpha(input[0]))
             {
                 confirm = tolower(input[0]);
@@ -2193,6 +2207,8 @@ void StockManager::deleteCustomer()
         if (confirm == 'y' || confirm == 'Y')
         {
             users.erase(it);
+            passwordMap.erase(usernameToDelete);
+            savePasswords(passwordMap);
             Table deleteConfirmationTable;
             deleteConfirmationTable.add_row({"| Successfully deleted customer: " + usernameToDelete});
             deleteConfirmationTable.format()
