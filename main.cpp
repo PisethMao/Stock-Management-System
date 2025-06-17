@@ -117,6 +117,7 @@ int main()
     while (isRunning)
     {
         system("cls");
+        system("clear");
         logo();
         vector<User> users;
         loadPasswords(passwordMap);

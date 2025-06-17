@@ -6,6 +6,7 @@
 #include "StockManager.hpp"
 #include "SortFilter.hpp"
 #include "BuyProduct.hpp"
+#include "ClearScreen.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -18,12 +19,7 @@ void pressEnterToContinue()
 
 void buyProduct(StockManager &manager)
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-
+    clearScreen ();
     vector<StockItem> &items = manager.getItems(); // Get stock by reference
 
     if (items.empty())

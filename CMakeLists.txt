@@ -24,6 +24,7 @@ add_executable(StockManagementSystem
   src/SortFilter.cpp
   src/BuyProduct.cpp
   src/PasswordUtils.cpp
+  src/ClearScreen.cpp
 )
 target_include_directories(StockManagementSystem PRIVATE include)
 target_link_libraries(StockManagementSystem PRIVATE xlnt)
