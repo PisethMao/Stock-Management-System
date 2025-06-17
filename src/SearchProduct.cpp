@@ -10,96 +10,6 @@
 using namespace std;
 using namespace tabulate;
 
-// void searchProductByName()
-// {
-// #ifdef _WIN32
-//     system("cls");
-// #else
-//     system("clear");
-// #endif
-//     string keyword;
-//     cout << "Enter product name: ";
-//     cin.ignore();
-//     getline(cin, keyword);
-
-//     StockManager manager;
-//     manager.searchProductByName(keyword);
-
-//     cout << "\nPress Enter to return to menu...";
-//     cin.ignore();
-//     cin.get();
-// }
-
-// void searchProductById()
-// {
-// #ifdef _WIN32
-//     system("cls");
-// #else
-//     system("clear");
-// #endif
-
-//     int id;
-//     cout << "Enter product ID to search: ";
-//     cin >> id;
-
-//     StockManager manager;
-//     manager.searchProductById(id);
-
-//     cout << "\nPress Enter to return to menu...";
-//     cin.ignore();
-//     cin.get();
-// }
-
-// void searchOption()
-// {
-//     int op;
-//     do
-//     {
-// #ifdef _WIN32
-//         system("cls");
-// #else
-//         system("clear");
-// #endif
-//         Table searchMenu;
-//         searchMenu.add_row({"=== Search Options ==="});
-//         searchMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-//         searchMenu.add_row({"1. Search Product By Name"});
-//         searchMenu.add_row({"2. Search Product By Id"});
-//         searchMenu.add_row({"3. Return to Main Menu"});
-//         searchMenu.format()
-//             .font_align(FontAlign::left)
-//             .border_top("-")
-//             .border_bottom("-")
-//             .border_left("|")
-//             .border_right("|")
-//             .corner("+");
-//         cout << searchMenu << endl;
-//         cout << "Choose your choice [1-3]: ";
-//         cin >> op;
-//         switch (op)
-//         {
-//         case 1:
-//             searchProductByName();
-//             break;
-//         case 2:
-//             searchProductById();
-//             break;
-//         case 3:
-//             showCustomerMenu();
-//             break;
-//         default:
-//             Table invalidTable;
-//             invalidTable.add_row({"===Invalid Option Please Choose Again from [1-5]==="});
-//             invalidTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-//             cout << invalidTable << endl;
-//             cout << "Press Enter to continue... ";
-//             cin.ignore();
-//             cin.get();
-//             break;
-//         }
-//     } while (op != 3);
-// }
-
 void searchOption(StockManager &stockManager)
 {
     bool isStayInSearchAndFilterMenu = true;
@@ -126,7 +36,7 @@ void searchOption(StockManager &stockManager)
             .border_right("|")
             .corner("+");
         cout << searchAndFilterMenu << endl;
-        cout << "Choose an option [1-9]: ";
+        cout << "Choose an option from [1-9]: ";
         if (!(cin >> subChoice) || subChoice < 1 || subChoice > 9)
         {
             Table invalidTable;
@@ -147,6 +57,18 @@ void searchOption(StockManager &stockManager)
         {
         case 1:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Search By ID >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             int id;
             while (true)
             {
@@ -179,6 +101,18 @@ void searchOption(StockManager &stockManager)
         }
         case 2:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Search By Type >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             string type;
             while (true)
             {
@@ -218,6 +152,18 @@ void searchOption(StockManager &stockManager)
         }
         case 3:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Search By Brand >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             string brand;
             while (true)
             {
@@ -257,6 +203,18 @@ void searchOption(StockManager &stockManager)
         }
         case 4:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Search By Model >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             string model;
             while (true)
             {
@@ -296,6 +254,18 @@ void searchOption(StockManager &stockManager)
         }
         case 5:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Filter By Year >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             int year;
             while (true)
             {
@@ -328,6 +298,18 @@ void searchOption(StockManager &stockManager)
         }
         case 6:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Filter By Origin >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             string origin;
             while (true)
             {
@@ -367,6 +349,18 @@ void searchOption(StockManager &stockManager)
         }
         case 7:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Filter By Quantity >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             int quantity;
             while (true)
             {
@@ -399,6 +393,18 @@ void searchOption(StockManager &stockManager)
         }
         case 8:
         {
+            system("cls");
+            Table displayTable;
+            displayTable.add_row({"===============[ << Filter By Price >> ]==============="});
+            displayTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << displayTable << endl;
             double price;
             while (true)
             {

@@ -2,18 +2,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include "StockManager.hpp"
 using namespace std;
 
-void sortFilterMenu();
-void sortProductsByIdASCD();
-void sortProductsByIdDESC();
-void sortProductsByTypeASCD();
-void sortProductsByTypeDESC();
-void sortProductsByModelASCD();
-void sortProductsByModelDESC();
-void sortProductsByPriceASCD();
-void sortProductsByPriceDESC();
-void sortProductsByBrandASCD();
-void sortProductsByBrandDESC();
-void sortProductsByYearASCD();
-void sortProductsByYearDESC();
+void sortFilterMenu(StockManager &stockManager);
