@@ -1,4 +1,5 @@
 #include "ClearScreen.hpp"
+#include <cstdlib>
 #include <iostream>
 using namespace std;
 void clearScreen()

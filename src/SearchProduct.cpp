@@ -57,7 +57,7 @@ void searchOption(StockManager &stockManager)
         {
         case 1:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Search By ID >> ]==============="});
             displayTable.format()
@@ -101,7 +101,7 @@ void searchOption(StockManager &stockManager)
         }
         case 2:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Search By Type >> ]==============="});
             displayTable.format()
@@ -152,7 +152,7 @@ void searchOption(StockManager &stockManager)
         }
         case 3:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Search By Brand >> ]==============="});
             displayTable.format()
@@ -203,7 +203,7 @@ void searchOption(StockManager &stockManager)
         }
         case 4:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Search By Model >> ]==============="});
             displayTable.format()
@@ -254,7 +254,7 @@ void searchOption(StockManager &stockManager)
         }
         case 5:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Filter By Year >> ]==============="});
             displayTable.format()
@@ -298,7 +298,7 @@ void searchOption(StockManager &stockManager)
         }
         case 6:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Filter By Origin >> ]==============="});
             displayTable.format()
@@ -349,7 +349,7 @@ void searchOption(StockManager &stockManager)
         }
         case 7:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Filter By Quantity >> ]==============="});
             displayTable.format()
@@ -393,7 +393,7 @@ void searchOption(StockManager &stockManager)
         }
         case 8:
         {
-            system("cls");
+            clearScreen();
             Table displayTable;
             displayTable.add_row({"===============[ << Filter By Price >> ]==============="});
             displayTable.format()

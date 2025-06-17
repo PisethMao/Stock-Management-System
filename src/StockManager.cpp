@@ -13,7 +13,6 @@
 #include <iomanip>
 #include <locale>
 #include <cctype>
-#include <regex>
 using namespace std;
 using namespace tabulate;
 int StockManager::nextId = 1;
@@ -115,15 +114,19 @@ void StockManager::loadSampleData()
     xlnt::workbook wb;
     xlnt::worksheet ws = wb.active_sheet();
     ws.title("Stock");
-    ws.cell("A1").value("ID");
-    ws.cell("B1").value("Type");
-    ws.cell("C1").value("Brand");
-    ws.cell("D1").value("Model");
-    ws.cell("E1").value("Year");
-    ws.cell("F1").value("Origin");
-    ws.cell("G1").value("Quantity");
-    ws.cell("H1").value("Price");
-    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"};
+    ws.merge_cells("A1:H1");
+    ws.cell("A1").value("ByteStock - Premium Tech Inventory");
+    ws.cell("A1").font(xlnt::font().bold(true).size(16));
+    ws.cell("A1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+    ws.cell("A2").value("ID");
+    ws.cell("B2").value("Type");
+    ws.cell("C2").value("Brand");
+    ws.cell("D2").value("Model");
+    ws.cell("E2").value("Year");
+    ws.cell("F2").value("Origin");
+    ws.cell("G2").value("Quantity");
+    ws.cell("H2").value("Price");
+    vector<string> headers = {"A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2"};
     for (const auto &cell : headers)
     {
         ws.cell(cell).alignment(
@@ -140,7 +143,7 @@ void StockManager::loadSampleData()
         {5, "Laptop", "Apple", "Macbook Pro M4 Pro", 2025, "USA", 12, 2299.99}};
     for (size_t i = 0; i < samples.size(); ++i)
     {
-        int row = static_cast<int>(i + 2);
+        int row = static_cast<int>(i + 3);
         const auto &item = samples[i];
         ws.cell("A" + to_string(row)).value(item.id);
         ws.cell("B" + to_string(row)).value(item.type);
@@ -177,8 +180,13 @@ void StockManager::loadDataFromFile()
         auto ws = wb.active_sheet();
         for (auto row : ws.rows(false))
         {
-            if (row[0].row() == 1)
+            if (row[0].reference().row() <= 2)
                 continue;
+            if (row.length() < 8)
+            {
+                cerr << "Skipping row " << row[0].reference().row() << ": not enough columns." << endl;
+                continue;
+            }
             StockItem item;
             try
             {
@@ -188,7 +196,11 @@ void StockManager::loadDataFromFile()
                 item.model = row[3].to_string();
                 item.year = stoi(row[4].to_string());
                 item.origin = row[5].to_string();
-                item.quantity = stoi(row[6].to_string());
+                string quantityStr = row[6].to_string();
+                if (quantityStr == "Out Of Stock")
+                    item.quantity = 0;
+                else
+                    item.quantity = stoi(quantityStr);
                 string raw = row[7].to_string();
                 raw.erase(remove(raw.begin(), raw.end(), '$'), raw.end());
                 raw.erase(remove(raw.begin(), raw.end(), ','), raw.end());
@@ -197,17 +209,17 @@ void StockManager::loadDataFromFile()
             }
             catch (const std::invalid_argument &e)
             {
-                cerr << "Error converting data in row " << row[0].row() << ": " << e.what() << endl;
+                cerr << "Error converting data in row " << row[0].reference().row() << ": " << e.what() << endl;
             }
             catch (const std::out_of_range &e)
             {
-                cerr << "Data out of range in row " << row[0].row() << ": " << e.what() << endl;
+                cerr << "Data out of range in row " << row[0].reference().row() << ": " << e.what() << endl;
             }
         }
     }
     catch (const xlnt::exception &e)
     {
-        cerr << "Error loading stock.xlsx: " << e.what() << endl;
+        cerr << "❌ Error loading stock.xlsx: " << e.what() << endl;
     }
 }
 void StockManager::saveDataToFile()
@@ -216,15 +228,19 @@ void StockManager::saveDataToFile()
     xlnt::workbook wb;
     xlnt::worksheet ws = wb.active_sheet();
     ws.title("Stock");
-    ws.cell("A1").value("ID");
-    ws.cell("B1").value("Type");
-    ws.cell("C1").value("Brand");
-    ws.cell("D1").value("Model");
-    ws.cell("E1").value("Year");
-    ws.cell("F1").value("Origin");
-    ws.cell("G1").value("Quantity");
-    ws.cell("H1").value("Price");
-    vector<string> headers = {"A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"};
+    ws.merge_cells("A1:H1");
+    ws.cell("A1").value("ByteStock - Premium Tech Inventory");
+    ws.cell("A1").font(xlnt::font().bold(true).size(16));
+    ws.cell("A1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+    ws.cell("A2").value("ID");
+    ws.cell("B2").value("Type");
+    ws.cell("C2").value("Brand");
+    ws.cell("D2").value("Model");
+    ws.cell("E2").value("Year");
+    ws.cell("F2").value("Origin");
+    ws.cell("G2").value("Quantity");
+    ws.cell("H2").value("Price");
+    vector<string> headers = {"A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2"};
     for (const auto &cell : headers)
     {
         ws.cell(cell).alignment(
@@ -233,7 +249,7 @@ void StockManager::saveDataToFile()
                 .vertical(xlnt::vertical_alignment::center));
         ws.cell(cell).font(xlnt::font().bold(true));
     }
-    int row = 2;
+    int row = 3;
     for (const auto &item : items)
     {
         ws.cell("A" + to_string(row)).value(item.id);
@@ -243,7 +259,7 @@ void StockManager::saveDataToFile()
         ws.cell("E" + to_string(row)).value(to_string(item.year));
         ws.cell("E" + to_string(row)).number_format(xlnt::number_format::text());
         ws.cell("F" + to_string(row)).value(item.origin);
-        ws.cell("G" + to_string(row)).value(to_string(item.quantity));
+        ws.cell("G" + to_string(row)).value(item.quantity == 0 ? "Out Of Stock" : to_string(item.quantity));
         ws.cell("H" + to_string(row)).value(formatPrice(item.price));
         ws.cell("A" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("B" + to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::left));
@@ -468,7 +484,8 @@ void StockManager::displayData()
         stringstream ss_price;
         ss_price.imbue(current_locale);
         ss_price << "$ " << fixed << setprecision(2) << item.price;
-        table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, to_string(item.quantity), ss_price.str()});
+        string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+        table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, quantityDisplay, ss_price.str()});
         size_t lastRow = table.size() - 1;
         table[lastRow][0].format().font_align(FontAlign::center);
         table[lastRow][1].format().font_align(FontAlign::left);
@@ -2172,7 +2189,9 @@ void StockManager::deleteCustomer(unordered_map<string, string> &passwordMap)
                 .border_right("|")
                 .corner("+");
             cout << invalidInputTable << endl;
-        }else{
+        }
+        else
+        {
             break;
         }
     }
