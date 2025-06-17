@@ -16,11 +16,7 @@ void showCustomerMenu()
     bool isStayInMenu = true;
     while (isStayInMenu)
     {
-#ifdef _WIN32
-        system("cls");
-#else
-        system("clear");
-#endif
+        clearScreen();
         int choice;
         Table menu;
         menu.add_row({" Customer Menu "});
@@ -43,8 +39,8 @@ void showCustomerMenu()
             "4. Buy Product",
             "5. Logout"};
         addSection(productItems);
-        menu.format()
-        clearScreen ();
+        menu.format();
+        // clearScreen();
         Table customerMenu;
         customerMenu.add_row({"=== Customer Menu ==="});
         customerMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
@@ -122,14 +118,15 @@ void showCustomerMenu()
             StockManager stockManager;
             sortFilterMenu(stockManager);
         }
-            break;
+        break;
         case 4:
         {
             StockManager stockManager;
             buyProduct(stockManager);
         }
         break;
-        case 5:{
+        case 5:
+        {
             logout();
             break;
         }

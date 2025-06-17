@@ -9,7 +9,7 @@ using namespace std;
 using namespace tabulate;
 void viewProducts()
 {
-    clearScreen ();
+    clearScreen();
     Table displayTable;
     displayTable.add_row({"===============[ << Available Products >> ]==============="});
     displayTable.format()

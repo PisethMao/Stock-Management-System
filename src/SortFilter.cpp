@@ -51,8 +51,8 @@ void sortFilterMenu(StockManager &stockManager)
         sortMenu.add_row({"15. Sort Ascending by Price"});
         sortMenu.add_row({"16. Sort Descending by Price"});
         sortMenu.add_row({"17. Exit Case Sort Menu"});
-        sortMenu.format()
-        clearScreen ();
+        sortMenu.format();
+        clearScreen();
         Table searchMenu;
         searchMenu.add_row({"=== Sort Options ==="});
         searchMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
@@ -259,13 +259,13 @@ void sortFilterMenu(StockManager &stockManager)
             break;
         }
         }
-    } while (op != 13);
+    }
 }
 
 // sort by ID ASCD
 void sortProductsByIdASCD()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -309,7 +309,7 @@ void sortProductsByIdASCD()
 // DESC
 void sortProductsByIdDESC()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -354,7 +354,7 @@ void sortProductsByIdDESC()
 // sort by type
 void sortProductsByTypeASCD()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -405,7 +405,7 @@ void sortProductsByTypeASCD()
 // desc
 void sortProductsByTypeDESC()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access internal vector
 
@@ -458,7 +458,7 @@ void sortProductsByTypeDESC()
 // sort by model
 void sortProductsByModelASCD()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -509,7 +509,7 @@ void sortProductsByModelASCD()
 // desc
 void sortProductsByModelDESC()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -561,7 +561,7 @@ void sortProductsByModelDESC()
 // sort by brand
 void sortProductsByBrandASCD()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -612,7 +612,7 @@ void sortProductsByBrandASCD()
 // desc
 void sortProductsByBrandDESC()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -664,7 +664,7 @@ void sortProductsByBrandDESC()
 // sort by price
 void sortProductsByPriceASCD()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access products
 
@@ -707,7 +707,7 @@ void sortProductsByPriceASCD()
 // desc
 void sortProductsByPriceDESC()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -751,7 +751,7 @@ void sortProductsByPriceDESC()
 // sort by year
 void sortProductsByYearASCD()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access products
 
@@ -794,7 +794,7 @@ void sortProductsByYearASCD()
 // desc
 void sortProductsByYearDESC()
 {
-    clearScreen ();
+    clearScreen();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access products
 

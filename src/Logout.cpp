@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iostream>
 using namespace std;
-void logout ()
+void logout()
 {
     // clearScreen ();
     string choice;
@@ -14,8 +14,8 @@ void logout ()
     getline(cin, choice);
     if (choice == "yes" || choice == "Yes" || choice == "y" || choice == "Y") {
         cout << "\t=>You are successfully logged out!!" << endl;
-        clearScreen ();
+        clearScreen();
     } else {
-        showCustomerMenu ();
+        showCustomerMenu();
     }
 }

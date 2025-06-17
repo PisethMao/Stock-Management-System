@@ -15,7 +15,7 @@ void searchOption(StockManager &stockManager)
     bool isStayInSearchAndFilterMenu = true;
     while (isStayInSearchAndFilterMenu)
     {
-        clearScreen ();
+        clearScreen();
         int subChoice;
         Table searchAndFilterMenu;
         searchAndFilterMenu.add_row({"===============[ << Search & Filter Menu >> ]==============="});
