@@ -3,16 +3,13 @@
 #include "ViewProduct.hpp"
 #include "StockManager.hpp"
 #include "AdminMenu.hpp"
+#include "ClearScreen.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
 void viewProducts()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     Table displayTable;
     displayTable.add_row({"===============[ << Available Products >> ]==============="});
     displayTable.format()

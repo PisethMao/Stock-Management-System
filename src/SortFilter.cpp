@@ -3,6 +3,7 @@
 #include "SortFilter.hpp"
 #include "CustomerMenu.hpp"
 #include "StockManager.hpp"
+#include "ClearScreen.hpp"
 using namespace tabulate;
 
 void sortFilterMenu()
@@ -10,11 +11,7 @@ void sortFilterMenu()
     int op;
     do
     {
-#ifdef _WIN32
-        system("cls");
-#else
-        system("clear");
-#endif
+        clearScreen ();
         Table searchMenu;
         searchMenu.add_row({"=== Sort Options ==="});
         searchMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
@@ -98,11 +95,7 @@ void sortFilterMenu()
 // sort by ID ASCD
 void sortProductsByIdASCD()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -146,11 +139,7 @@ void sortProductsByIdASCD()
 // DESC
 void sortProductsByIdDESC()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -195,11 +184,7 @@ void sortProductsByIdDESC()
 // sort by type
 void sortProductsByTypeASCD()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -250,11 +235,7 @@ void sortProductsByTypeASCD()
 // desc
 void sortProductsByTypeDESC()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access internal vector
 
@@ -307,11 +288,7 @@ void sortProductsByTypeDESC()
 // sort by model
 void sortProductsByModelASCD()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -362,11 +339,7 @@ void sortProductsByModelASCD()
 // desc
 void sortProductsByModelDESC()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -418,11 +391,7 @@ void sortProductsByModelDESC()
 // sort by brand
 void sortProductsByBrandASCD()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -473,11 +442,7 @@ void sortProductsByBrandASCD()
 // desc
 void sortProductsByBrandDESC()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -529,11 +494,7 @@ void sortProductsByBrandDESC()
 // sort by price
 void sortProductsByPriceASCD()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access products
 
@@ -576,11 +537,7 @@ void sortProductsByPriceASCD()
 // desc
 void sortProductsByPriceDESC()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems();
 
@@ -624,11 +581,7 @@ void sortProductsByPriceDESC()
 // sort by year
 void sortProductsByYearASCD()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access products
 
@@ -671,11 +624,7 @@ void sortProductsByYearASCD()
 // desc
 void sortProductsByYearDESC()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    clearScreen ();
     StockManager manager;
     vector<StockItem> &items = manager.getItems(); // Access products
 

@@ -6,6 +6,8 @@
 #include "StockManager.hpp"
 #include "SortFilter.hpp"
 #include "BuyProduct.hpp"
+#include "Logout.hpp"
+#include "ClearScreen.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -14,11 +16,7 @@ void showCustomerMenu()
     int choice;
     do
     {
-#ifdef _WIN32
-        system("cls");
-#else
-        system("clear");
-#endif
+        clearScreen ();
         Table customerMenu;
         customerMenu.add_row({"=== Customer Menu ==="});
         customerMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
@@ -57,8 +55,10 @@ void showCustomerMenu()
             buyProduct(stockManager);
         }
         break;
-        case 5:
+        case 5:{
+            logout();
             break;
+        }
         default:
             Table invalidTable;
             invalidTable.add_row({"===Invalid Option Please Choose Again from [1-5]==="});
