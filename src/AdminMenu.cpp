@@ -31,9 +31,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
     bool isStayInMenu = true;
     while (isStayInMenu)
     {
-        clearScreen ();
-        system("cls");
-        system("clear");
+        clearScreen();
         int choice;
         Table menu;
         menu.add_row({" Admin Panel - Stock Management System "});
@@ -105,9 +103,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         {
         case 1:
         {
-            clearScreen ();
-            system("cls");
-            system("clear");
+            clearScreen();
             Table createTable;
             createTable.add_row({"===============[ << Create A New Records >> ]==============="});
             createTable.format()
@@ -124,7 +120,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 2:
         {
-            clearScreen ();
+            clearScreen();
             system("cls");
             system("clear");
             Table displayTable;
@@ -148,9 +144,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
             bool isStayInSearchAndFilterMenu = true;
             while (isStayInSearchAndFilterMenu)
             {
-                clearScreen ();
-                system("cls");
-                system("clear");
+                clearScreen();
                 int subChoice;
                 Table searchAndFilterMenu;
                 searchAndFilterMenu.add_row({"===============[ << Search & Filter Menu >> ]==============="});
@@ -610,7 +604,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 4:
         {
-            clearScreen ();
+            clearScreen();
             system("cls");
             system("clear");
             Table updateTable;
@@ -631,7 +625,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 5:
         {
-            clearScreen ();
+            clearScreen();
             system("cls");
             system("clear");
             Table deleteTable;
@@ -652,13 +646,13 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 6:
         {
-            clearScreen ();
+            clearScreen();
             system("cls");
             system("clear");
             bool isStayInSortMenu = true;
             while (isStayInSortMenu)
             {
-                clearScreen ();
+                clearScreen();
                 int subChoice;
                 Table sortMenu;
                 sortMenu.add_row({"===============[ << Sort Menu >> ]==============="});
@@ -874,7 +868,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 7:
         {
-            clearScreen ();
+            clearScreen();
             system("cls");
             system("clear");
             Table viewUsersTable;
@@ -895,7 +889,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 8:
         {
-            clearScreen ();
+            clearScreen();
             system("cls");
             system("clear");
             Table deleteUsersTable;
