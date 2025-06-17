@@ -13,13 +13,13 @@ using namespace tabulate;
 void pressEnterToContinue()
 {
     cout << "\nPress Enter to return...";
-    cin.ignore();
+    // cin.ignore();
     cin.get();
 }
 
 void buyProduct(StockManager &manager)
 {
-    clearScreen ();
+    clearScreen();
     vector<StockItem> &items = manager.getItems(); // Get stock by reference
 
     if (items.empty())
@@ -111,7 +111,7 @@ void buyProduct(StockManager &manager)
     cout << "Unit Price: $" << fixed << setprecision(2) << it->price << "\n";
     cout << "Total Price: $" << fixed << setprecision(2) << total << "\n";
     cout << "\nPurchase Successful!\n";
-
+    cin.ignore();
     pressEnterToContinue();
 }
 

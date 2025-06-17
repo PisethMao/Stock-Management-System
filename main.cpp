@@ -7,6 +7,7 @@
 #include "include/CustomerMenu.hpp"
 #include "include/StringUtils.hpp"
 #include "include/PasswordUtils.hpp"
+#include "include/ClearScreen.hpp"
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
@@ -116,8 +117,7 @@ int main()
     bool isRunning = true;
     while (isRunning)
     {
-        system("cls");
-        system("clear");
+        clearScreen();
         logo();
         vector<User> users;
         loadPasswords(passwordMap);

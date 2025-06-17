@@ -1,7 +1,7 @@
 #include "ClearScreen.hpp"
 #include <iostream>
 using namespace std;
-void clearScreen ()
+void clearScreen()
 {
     #ifdef _WIN32
         system("cls");
