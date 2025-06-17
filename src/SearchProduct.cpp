@@ -4,6 +4,7 @@
 #include "StockManager.hpp"
 #include "CustomerMenu.hpp"
 #include "AdminMenu.hpp"
+#include "ClearScreen.hpp"
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -104,7 +105,7 @@ void searchOption(StockManager &stockManager)
     bool isStayInSearchAndFilterMenu = true;
     while (isStayInSearchAndFilterMenu)
     {
-        system("cls");
+        clearScreen ();
         int subChoice;
         Table searchAndFilterMenu;
         searchAndFilterMenu.add_row({"===============[ << Search & Filter Menu >> ]==============="});

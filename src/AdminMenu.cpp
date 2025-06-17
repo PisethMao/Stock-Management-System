@@ -2,6 +2,7 @@
 #include <tabulate/table.hpp>
 #include "AdminMenu.hpp"
 #include "StockManager.hpp"
+#include "ClearScreen.hpp"
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -30,7 +31,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
     bool isStayInMenu = true;
     while (isStayInMenu)
     {
-        system("cls");
+        clearScreen ();
         int choice;
         Table menu;
         menu.add_row({" Admin Panel - Stock Management System "});
@@ -102,7 +103,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         {
         case 1:
         {
-            system("cls");
+            clearScreen ();
             Table createTable;
             createTable.add_row({"===============[ << Create A New Records >> ]==============="});
             createTable.format()
@@ -119,7 +120,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 2:
         {
-            system("cls");
+            clearScreen ();
             Table displayTable;
             displayTable.add_row({"===============[ << Display All Records >> ]==============="});
             displayTable.format()
@@ -141,7 +142,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
             bool isStayInSearchAndFilterMenu = true;
             while (isStayInSearchAndFilterMenu)
             {
-                system("cls");
+                clearScreen ();
                 int subChoice;
                 Table searchAndFilterMenu;
                 searchAndFilterMenu.add_row({"===============[ << Search & Filter Menu >> ]==============="});
@@ -183,7 +184,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                 case 1:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Search By ID >> ]==============="});
                     displayTable.format()
@@ -227,7 +228,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 2:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Search By Type >> ]==============="});
                     displayTable.format()
@@ -278,7 +279,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 3:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Search By Brand >> ]==============="});
                     displayTable.format()
@@ -329,7 +330,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 4:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Search By Model >> ]==============="});
                     displayTable.format()
@@ -380,7 +381,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 5:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Filter By Year >> ]==============="});
                     displayTable.format()
@@ -424,7 +425,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 6:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Filter By Origin >> ]==============="});
                     displayTable.format()
@@ -475,7 +476,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 7:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Filter By Quantity >> ]==============="});
                     displayTable.format()
@@ -519,7 +520,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 8:
                 {
-                    system("cls");
+                    clearScreen ();
                     Table displayTable;
                     displayTable.add_row({"===============[ << Filter By Price >> ]==============="});
                     displayTable.format()
@@ -601,7 +602,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 4:
         {
-            system("cls");
+            clearScreen ();
             Table updateTable;
             updateTable.add_row({"===============[ << Update Records >> ]==============="});
             updateTable.format()
@@ -620,7 +621,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 5:
         {
-            system("cls");
+            clearScreen ();
             Table deleteTable;
             deleteTable.add_row({"===============[ << Delete Records >> ]==============="});
             deleteTable.format()
@@ -639,11 +640,11 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 6:
         {
-            system("cls");
+            clearScreen ();
             bool isStayInSortMenu = true;
             while (isStayInSortMenu)
             {
-                system("cls");
+                clearScreen ();
                 int subChoice;
                 Table sortMenu;
                 sortMenu.add_row({"===============[ << Sort Menu >> ]==============="});
@@ -693,7 +694,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                 case 1:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByIdASC();
                     cin.ignore();
                     pressEnter();
@@ -701,7 +702,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 2:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByIdDESC();
                     cin.ignore();
                     pressEnter();
@@ -709,7 +710,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 3:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByTypeASC();
                     cin.ignore();
                     pressEnter();
@@ -717,7 +718,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 4:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByTypeDESC();
                     cin.ignore();
                     pressEnter();
@@ -725,7 +726,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 5:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByBrandASC();
                     cin.ignore();
                     pressEnter();
@@ -733,7 +734,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 6:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByBrandDESC();
                     cin.ignore();
                     pressEnter();
@@ -741,7 +742,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 7:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByModelASC();
                     cin.ignore();
                     pressEnter();
@@ -749,7 +750,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 8:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByModelDESC();
                     cin.ignore();
                     pressEnter();
@@ -757,7 +758,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 9:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByYearASC();
                     cin.ignore();
                     pressEnter();
@@ -765,7 +766,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 10:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByYearDESC();
                     cin.ignore();
                     pressEnter();
@@ -773,7 +774,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 11:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByOriginASC();
                     cin.ignore();
                     pressEnter();
@@ -781,7 +782,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 12:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByOriginDESC();
                     cin.ignore();
                     pressEnter();
@@ -789,7 +790,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 13:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByQuantityASC();
                     cin.ignore();
                     pressEnter();
@@ -797,7 +798,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 14:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByQuantityDESC();
                     cin.ignore();
                     pressEnter();
@@ -805,7 +806,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 15:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByPriceASC();
                     cin.ignore();
                     pressEnter();
@@ -813,7 +814,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 }
                 case 16:
                 {
-                    system("cls");
+                    clearScreen ();
                     stockManager.sortRecordByPriceDESC();
                     cin.ignore();
                     pressEnter();
@@ -859,7 +860,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 7:
         {
-            system("cls");
+            clearScreen ();
             Table viewUsersTable;
             viewUsersTable.add_row({"===============[ << View All Customers Feature Placeholder >> ]==============="});
             viewUsersTable.format()
@@ -878,7 +879,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         }
         case 8:
         {
-            system("cls");
+            clearScreen ();
             Table deleteUsersTable;
             deleteUsersTable.add_row({"===============[ << Delete Customer Feature Placeholder >> ]==============="});
             deleteUsersTable.format()

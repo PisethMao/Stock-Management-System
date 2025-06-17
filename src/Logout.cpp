@@ -1,17 +1,10 @@
 #include "Logout.hpp"
 #include "Auth.hpp"
 #include "CustomerMenu.hpp"
+#include "ClearScreen.hpp"
 #include <algorithm>
 #include <iostream>
 using namespace std;
-void clearScreen ()
-{
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
-}
 void logout ()
 {
     // clearScreen ();
