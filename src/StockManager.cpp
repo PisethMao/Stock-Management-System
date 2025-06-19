@@ -3,6 +3,8 @@
 #include "StockManager.hpp"
 #include "StringUtils.hpp"
 #include "PasswordUtils.hpp"
+#include "ClearScreen.hpp"
+#include "Color.hpp"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -13,6 +15,14 @@
 #include <iomanip>
 #include <locale>
 #include <cctype>
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+#include <ctime>
+#include <vector>
+#include <unordered_map>
+#include <fstream>
+#include <conio.h>
 using namespace std;
 using namespace tabulate;
 int StockManager::nextId = 1;
@@ -280,8 +290,9 @@ void StockManager::createRecord()
     item.id = nextId++;
     while (true)
     {
-        cout << "Enter type of product: ";
+        cout << MAGENTA << "|>> Enter type of product: ";
         getline(cin >> ws, item.type);
+        cout << RESET;
         if (isValidNameOrOrigin(item.type))
             break;
         else
@@ -296,7 +307,7 @@ void StockManager::createRecord()
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << invalidTable << endl;
+            cout << RED << invalidTable << RESET << endl;
         }
     }
     while (true)
@@ -474,35 +485,98 @@ void StockManager::displayData()
         cout << stockTable << endl;
         return;
     }
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (items.size() + itemsPerPage - 1) / itemsPerPage;
     locale current_locale("");
     cout.imbue(current_locale);
-    Table table;
-    table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-    for (const auto &item : items)
+    while (true)
     {
-        stringstream ss_price;
-        ss_price.imbue(current_locale);
-        ss_price << "$ " << fixed << setprecision(2) << item.price;
-        string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
-        table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, quantityDisplay, ss_price.str()});
-        size_t lastRow = table.size() - 1;
-        table[lastRow][0].format().font_align(FontAlign::center);
-        table[lastRow][1].format().font_align(FontAlign::left);
-        table[lastRow][2].format().font_align(FontAlign::left);
-        table[lastRow][3].format().font_align(FontAlign::left);
-        table[lastRow][4].format().font_align(FontAlign::center);
-        table[lastRow][5].format().font_align(FontAlign::center);
-        table[lastRow][6].format().font_align(FontAlign::center);
-        table[lastRow][7].format().font_align(FontAlign::center);
+        clearScreen();
+        Table displayTable;
+        displayTable.add_row({"===============[ << Display All Records >> ]==============="});
+        displayTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << displayTable << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, (int)items.size());
+        for (int i = start; i < end; ++i)
+        {
+            const auto &item = items[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, quantityDisplay, ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
+        }
+        table.format()
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
-    table.format()
-        .border_top("-")
-        .border_bottom("-")
-        .border_left("|")
-        .border_right("|")
-        .corner("+");
-    cout << table << endl;
 }
 void StockManager::searchById(int id) const
 {
@@ -553,47 +627,15 @@ void StockManager::searchById(int id) const
 }
 void StockManager::searchByType(const string &type) const
 {
-    bool isFound = false;
-    Table result;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+    vector<StockItem> matchedItems;
     for (const auto &item : items)
     {
         if (item.type == type)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            matchedItems.push_back(item);
         }
     }
-    if (isFound)
-    {
-        result.format()
-            .font_align(FontAlign::center)
-            .font_style({FontStyle::bold})
-            .border_top("-")
-            .border_bottom("-")
-            .border_left("|")
-            .border_right("|")
-            .corner("+");
-        cout << result << endl;
-    }
-    else
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No records found with type: " + type});
@@ -606,51 +648,112 @@ void StockManager::searchByType(const string &type) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
     }
-}
-void StockManager::searchByBrand(const string &brand) const
-{
-    bool isFound = false;
-    Table result;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
-    for (const auto &item : items)
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
     {
-        if (item.brand == brand)
+        clearScreen();
+        Table title;
+        title.add_row({"========[ << Search Results by Type: " + type + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, (int)matchedItems.size());
+        for (int i = start; i < end; ++i)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
         }
-    }
-    if (isFound)
-    {
-        result.format()
-            .font_align(FontAlign::center)
-            .font_style({FontStyle::bold})
+        table.format()
             .border_top("-")
             .border_bottom("-")
             .border_left("|")
             .border_right("|")
             .corner("+");
-        cout << result << endl;
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
-    else
+}
+void StockManager::searchByBrand(const string &brand) const
+{
+    vector<StockItem> matchedItems;
+    for (const auto &item : items)
+    {
+        if (item.brand == brand)
+        {
+            matchedItems.push_back(item);
+        }
+    }
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No records found with brand: " + brand});
@@ -663,51 +766,112 @@ void StockManager::searchByBrand(const string &brand) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
     }
-}
-void StockManager::searchByModel(const string &model) const
-{
-    bool isFound = false;
-    Table result;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
-    for (const auto &item : items)
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
     {
-        if (item.model == model)
+        clearScreen();
+        Table title;
+        title.add_row({"========[ << Search Results by Brand: " + brand + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, (int)matchedItems.size());
+        for (int i = start; i < end; ++i)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
         }
-    }
-    if (isFound)
-    {
-        result.format()
-            .font_align(FontAlign::center)
-            .font_style({FontStyle::bold})
+        table.format()
             .border_top("-")
             .border_bottom("-")
             .border_left("|")
             .border_right("|")
             .corner("+");
-        cout << result << endl;
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
-    else
+}
+void StockManager::searchByModel(const string &model) const
+{
+    vector<StockItem> matchedItems;
+    for (const auto &item : items)
+    {
+        if (item.model == model)
+        {
+            matchedItems.push_back(item);
+        }
+    }
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No records found with model: " + model});
@@ -720,43 +884,112 @@ void StockManager::searchByModel(const string &model) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
+    }
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
+    {
+        clearScreen();
+        Table title;
+        title.add_row({"========[ << Search Results by Model: " + model + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, static_cast<int>(matchedItems.size()));
+        for (int i = start; i < end; ++i)
+        {
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
+        }
+        table.format()
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
 }
 void StockManager::filterByYear(int year) const
 {
-    Table result;
-    bool isFound = false;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    vector<StockItem> matchedItems;
     for (const auto &item : items)
     {
         if (item.year == year)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            matchedItems.push_back(item);
         }
     }
-    if (isFound)
-    {
-        cout << result << endl;
-    }
-    else
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No items found for year: " + to_string(year)});
@@ -769,43 +1002,112 @@ void StockManager::filterByYear(int year) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
+    }
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
+    {
+        clearScreen();
+        Table title;
+        title.add_row({"========[ << Filtered Results by Year: " + to_string(year) + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, static_cast<int>(matchedItems.size()));
+        for (int i = start; i < end; ++i)
+        {
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
+        }
+        table.format()
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
 }
 void StockManager::filterByOrigin(const string &origin) const
 {
-    Table result;
-    bool isFound = false;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    vector<StockItem> matchedItems;
     for (const auto &item : items)
     {
         if (item.origin == origin)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            matchedItems.push_back(item);
         }
     }
-    if (isFound)
-    {
-        cout << result << endl;
-    }
-    else
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No items found for origin: " + origin});
@@ -818,43 +1120,112 @@ void StockManager::filterByOrigin(const string &origin) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
+    }
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
+    {
+        clearScreen();
+        Table title;
+        title.add_row({"========[ << Filtered Results by Origin: " + origin + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, static_cast<int>(matchedItems.size()));
+        for (int i = start; i < end; ++i)
+        {
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
+        }
+        table.format()
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
 }
 void StockManager::filterByQuantity(int quantity) const
 {
-    Table result;
-    bool isFound = false;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    vector<StockItem> matchedItems;
     for (const auto &item : items)
     {
         if (item.quantity == quantity)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            matchedItems.push_back(item);
         }
     }
-    if (isFound)
-    {
-        cout << result << endl;
-    }
-    else
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No items found with quantity: " + to_string(quantity)});
@@ -867,43 +1238,112 @@ void StockManager::filterByQuantity(int quantity) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
+    }
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
+    {
+        clearScreen();
+        Table title;
+        title.add_row({"========[ << Filtered Results by Quantity: " + to_string(quantity) + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, static_cast<int>(matchedItems.size()));
+        for (int i = start; i < end; ++i)
+        {
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
+        }
+        table.format()
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
 }
 void StockManager::filterByPrice(double price) const
 {
-    Table result;
-    bool isFound = false;
-    result.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-    result.format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+    vector<StockItem> matchedItems;
     for (const auto &item : items)
     {
         if (item.price == price)
         {
-            isFound = true;
-            result.add_row({to_string(item.id),
-                            item.type,
-                            item.brand,
-                            item.model,
-                            to_string(item.year),
-                            item.origin,
-                            to_string(item.quantity),
-                            formatPrice(item.price)});
-            size_t lastRow = result.size() - 1;
-            result[lastRow][0].format().font_align(FontAlign::center);
-            result[lastRow][1].format().font_align(FontAlign::left);
-            result[lastRow][2].format().font_align(FontAlign::left);
-            result[lastRow][3].format().font_align(FontAlign::left);
-            result[lastRow][4].format().font_align(FontAlign::center);
-            result[lastRow][5].format().font_align(FontAlign::center);
-            result[lastRow][6].format().font_align(FontAlign::center);
-            result[lastRow][7].format().font_align(FontAlign::center);
+            matchedItems.push_back(item);
         }
     }
-    if (isFound)
-    {
-        cout << result << endl;
-    }
-    else
+    if (matchedItems.empty())
     {
         Table notFound;
         notFound.add_row({"No items found with price: " + formatPrice(price)});
@@ -916,6 +1356,102 @@ void StockManager::filterByPrice(double price) const
             .border_right("|")
             .corner("+");
         cout << notFound << endl;
+        return;
+    }
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (matchedItems.size() + itemsPerPage - 1) / itemsPerPage;
+    locale current_locale("");
+    cout.imbue(current_locale);
+    while (true)
+    {
+        clearScreen();
+        Table title;
+        stringstream formattedPrice;
+        formattedPrice.imbue(current_locale);
+        formattedPrice << "$ " << fixed << setprecision(2) << price;
+        title.add_row({"========[ << Filtered Results by Price: " + formattedPrice.str() + " >> ]========"});
+        title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << title << endl;
+        Table table;
+        table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, static_cast<int>(matchedItems.size()));
+        for (int i = start; i < end; ++i)
+        {
+            const auto &item = matchedItems[i];
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id),
+                           item.type,
+                           item.brand,
+                           item.model,
+                           to_string(item.year),
+                           item.origin,
+                           quantityDisplay,
+                           ss_price.str()});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][0].format().font_align(FontAlign::center);
+            table[lastRow][1].format().font_align(FontAlign::left);
+            table[lastRow][2].format().font_align(FontAlign::left);
+            table[lastRow][3].format().font_align(FontAlign::left);
+            table[lastRow][4].format().font_align(FontAlign::center);
+            table[lastRow][5].format().font_align(FontAlign::center);
+            table[lastRow][6].format().font_align(FontAlign::center);
+            table[lastRow][7].format().font_align(FontAlign::center);
+        }
+        table.format()
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
     }
 }
 void StockManager::updateRecord()
@@ -2136,33 +2672,103 @@ void StockManager::logout()
 }
 void StockManager::viewAllCustomers(const vector<User> &users)
 {
-    Table table;
-    table.add_row({"No.", "Username", "Password"});
-    table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-    int index = 1;
+    vector<User> customerList;
     for (const auto &user : users)
     {
         if (user.getRole() == Role::CUSTOMER)
         {
-            table.add_row({
-                to_string(index++),
-                user.getUsername(),
-                "********",
-            });
+            customerList.push_back(user);
         }
     }
-    table.format()
-        .font_align(FontAlign::center)
-        .border_top("-")
-        .border_bottom("-")
-        .border_left("|")
-        .border_right("|")
-        .corner("+");
-    for (size_t i = 1; i < table.size(); ++i)
+    if (customerList.empty())
     {
-        table[i][1].format().font_align(FontAlign::left);
+        Table emptyTable;
+        emptyTable.add_row({"No customer accounts found."});
+        emptyTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << emptyTable << endl;
+        return;
     }
-    cout << table << endl;
+    const int itemsPerPage = 5;
+    int currentPage = 0;
+    int totalPages = (customerList.size() + itemsPerPage - 1) / itemsPerPage;
+    while (true)
+    {
+        clearScreen();
+        Table header;
+        header.add_row({"========[ << All Registered Customers >> ]========"});
+        header.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << header << endl;
+        Table table;
+        table.add_row({"No.", "Username", "Password"});
+        table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+        int start = currentPage * itemsPerPage;
+        int end = min(start + itemsPerPage, static_cast<int>(customerList.size()));
+        for (int i = start; i < end; ++i)
+        {
+            table.add_row({to_string(i + 1),
+                           customerList[i].getUsername(),
+                           "********"});
+            size_t lastRow = table.size() - 1;
+            table[lastRow][1].format().font_align(FontAlign::left);
+        }
+        table.format()
+            .font_align(FontAlign::center)
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << table << endl;
+        ostringstream pageInfo;
+        pageInfo << "Page: " << (currentPage + 1) << " of " << totalPages;
+        Table footer;
+        footer.add_row({pageInfo.str()});
+        footer[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+        cout << footer << endl;
+        while (true)
+        {
+            cout << "Use <- (left), -> (right), or ESC to quit...";
+            int ch = _getch();
+            if (ch == 224)
+            {
+                ch = _getch();
+                if (ch == 77 && currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    break;
+                }
+                else if (ch == 75 && currentPage > 0)
+                {
+                    currentPage--;
+                    break;
+                }
+            }
+            else if (ch == 27)
+            {
+                cout << endl;
+                return;
+            }
+            cout << endl;
+            Table errorTable;
+            errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
+            errorTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            cout << errorTable << endl;
+        }
+    }
 }
 void StockManager::setUsers(const vector<User> &users)
 {

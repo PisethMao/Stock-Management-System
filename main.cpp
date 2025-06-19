@@ -8,6 +8,7 @@
 #include "include/StringUtils.hpp"
 #include "include/PasswordUtils.hpp"
 #include "include/ClearScreen.hpp"
+#include "include/Color.hpp"
 #include <vector>
 #include <iostream>
 #include <xlnt/xlnt.hpp>
@@ -23,11 +24,13 @@ using namespace tabulate;
 unordered_map<string, string> passwordMap;
 void logo()
 {
+    cout << CYAN << BOLD << endl;
     cout << "\t\t\t\t__        __   _                            _          ____  __  __ ____" << endl;
     cout << "\t\t\t\t\\ \\      / /__| | ___ ___  _ __ ___   ___  | |_ ___   / ___||  \\/  / ___| " << endl;
     cout << "\t\t\t\t \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  \\___ \\| |\\/| \\___ \\ " << endl;
     cout << "\t\t\t\t  \\ V  V /  __/ | (_  (_) | | | | | |  __/ | || (_)    ___) | |  | |___) |" << endl;
     cout << "\t\t\t\t   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/  |____/|_|  |_|____/ " << endl;
+    cout << RESET << endl;
 }
 void loadPasswords(unordered_map<string, string> &passwordMap)
 {
@@ -112,6 +115,25 @@ void exportUsersToExcel(const vector<User> &users)
     wb.save("users.xlsx");
     savePasswords(tempPasswordMap);
 }
+void welcomeMessage(User *currentUser)
+{
+    string message = "                         Welcome, " + currentUser->getUsername() + "!                    ";
+    Table successTable;
+    successTable.add_row({message});
+    successTable.add_row({"                        Press Enter to continue...                      "});
+    successTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << successTable;
+    cout << WHITE << oss.str() << RESET << endl;
+    cin.get();
+}
 int main()
 {
     bool isRunning = true;
@@ -152,20 +174,7 @@ int main()
             currentUser = login(users, passwordMap);
             exportUsersToExcel(users);
         }
-        string message = "          Welcome, " + currentUser->getUsername() + "!        ";
-        Table successTable;
-        successTable.add_row({message});
-        successTable.add_row({"Press Enter to continue..."});
-        successTable.format()
-            .font_align(FontAlign::center)
-            .font_style({FontStyle::bold})
-            .border_top("-")
-            .border_bottom("-")
-            .border_left("|")
-            .border_right("|")
-            .corner("+");
-        cout << successTable << endl;
-        cin.get();
+        welcomeMessage(currentUser);
         if (currentUser->getRole() == Role::ADMIN)
         {
             showAdminMenu(stockManager, isRunning, passwordMap);
