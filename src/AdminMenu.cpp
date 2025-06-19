@@ -3,6 +3,7 @@
 #include "AdminMenu.hpp"
 #include "StockManager.hpp"
 #include "ClearScreen.hpp"
+#include "Color.hpp"
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -26,6 +27,68 @@ void pressEnter()
     cout << pressTable << endl;
     cin.get();
 }
+void adminMenu()
+{
+    Table menu;
+    menu.add_row({"      Admin Panel - Stock Management System       "});
+    menu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+    menu.add_row({""});
+    menu[1].format().border_bottom("-");
+    auto addSection = [&](const vector<string> &items)
+    {
+        for (const auto &item : items)
+        {
+            menu.add_row({item});
+        }
+        menu.add_row({""});
+        menu[menu.size() - 1].format().border_bottom("-");
+    };
+    vector<string> productItems = {
+        "[ Product Management ]",
+        "1. Create a new record",
+        "2. Display table in data format",
+        "3. Search/Filter data",
+        "4. Update existing record",
+        "5. Delete a product record",
+        "6. Sort product data"};
+    vector<string> userItems = {
+        "[ User Management ]",
+        "7. View all customers",
+        "8. Delete a customer"};
+    vector<string> sessionItems = {
+        "[ Session ]",
+        "9. Logout",
+        "10. Exit the program"};
+    addSection(productItems);
+    addSection(userItems);
+    addSection(sessionItems);
+    menu.format()
+        .font_align(FontAlign::left)
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << menu;
+    cout << BLUE << oss.str() << RESET << endl;
+}
+void invalidMessage()
+{
+    Table invalidTable;
+    invalidTable.add_row({"Invalid input! Please enter a number from 1 to 10."});
+    invalidTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << invalidTable;
+    cout << RED << oss.str() << RESET << endl;
+}
 void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<string, string> &passwordMap)
 {
     bool isStayInMenu = true;
@@ -33,67 +96,18 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
     {
         clearScreen();
         int choice;
-        Table menu;
-        menu.add_row({" Admin Panel - Stock Management System "});
-        menu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-        menu.add_row({""});
-        menu[1].format().border_bottom("-");
-        auto addSection = [&](const vector<string> &items)
-        {
-            for (const auto &item : items)
-            {
-                menu.add_row({item});
-            }
-            menu.add_row({""});
-            menu[menu.size() - 1].format().border_bottom("-");
-        };
-        vector<string> productItems = {
-            "[ Product Management ]",
-            "1. Create a new record",
-            "2. Display table in data format",
-            "3. Search/Filter data",
-            "4. Update existing record",
-            "5. Delete a product record",
-            "6. Sort product data"};
-        vector<string> userItems = {
-            "[ User Management ]",
-            "7. View all customers",
-            "8. Delete a customer"};
-        vector<string> sessionItems = {
-            "[ Session ]",
-            "9. Logout",
-            "10. Exit the program"};
-        addSection(productItems);
-        addSection(userItems);
-        addSection(sessionItems);
-        menu.format()
-            .font_align(FontAlign::left)
-            .border_top("-")
-            .border_bottom("-")
-            .border_left("|")
-            .border_right("|")
-            .corner("+");
-        cout << menu << endl;
+        adminMenu();
         while (true)
         {
-            cout << "Choose your choice from [1-10]: ";
+            cout << MAGENTA << "|>> Choose your choice from [1-10]: ";
             if (cin >> choice && choice >= 1 && choice <= 10)
             {
+                cout << RESET;
                 break;
             }
             else
             {
-                Table invalidTable;
-                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 10."});
-                invalidTable.format()
-                    .font_align(FontAlign::center)
-                    .font_style({FontStyle::bold})
-                    .border_top("-")
-                    .border_bottom("-")
-                    .border_left("|")
-                    .border_right("|")
-                    .corner("+");
-                cout << invalidTable << endl;
+                invalidMessage();
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 continue;
@@ -114,26 +128,12 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << createTable << endl;
+            cout << BLUE << createTable << RESET << endl;
             stockManager.createRecord();
             break;
         }
         case 2:
         {
-            clearScreen();
-            system("cls");
-            system("clear");
-            Table displayTable;
-            displayTable.add_row({"===============[ << Display All Records >> ]==============="});
-            displayTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
-                .border_top("-")
-                .border_bottom("-")
-                .border_left("|")
-                .border_right("|")
-                .corner("+");
-            cout << displayTable << endl;
             stockManager.displayData();
             cin.ignore();
             pressEnter();
