@@ -177,11 +177,8 @@ void invalidInputMessage()
     oss << invalidTable;
     cout << RED << oss.str() << RESET << endl;
 }
-User *login(vector<User> &users, unordered_map<string, string> &passwordMap)
+void loginMenu()
 {
-    string username;
-    string password;
-    const User *foundUser = nullptr;
     Table loginTable;
     loginTable.add_row({"                    Please login your account to continue.              "});
     loginTable.format()
@@ -192,7 +189,16 @@ User *login(vector<User> &users, unordered_map<string, string> &passwordMap)
         .border_left("|")
         .border_right("|")
         .corner("+");
-    cout << BLUE << loginTable << RESET << endl;
+    ostringstream oss;
+    oss << loginTable;
+    cout << BLUE << oss.str() << RESET << endl;
+}
+User *login(vector<User> &users, unordered_map<string, string> &passwordMap)
+{
+    string username;
+    string password;
+    const User *foundUser = nullptr;
+    loginMenu();
     try
     {
         while (true)
