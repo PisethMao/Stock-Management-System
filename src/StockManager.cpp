@@ -22,7 +22,24 @@
 #include <vector>
 #include <unordered_map>
 #include <fstream>
+#ifdef _WIN32
 #include <conio.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+char getch()
+{
+    char buf = 0;
+    struct termios old = {};
+    tcgetattr(STDIN_FILENO, &old);
+    struct termios new_term = old;
+    new_term.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
+    read(STDIN_FILENO, &buf, 1);
+    tcsetattr(STDIN_FILENO, TCSANOW, &old);
+    return buf;
+}
+#endif
 using namespace std;
 using namespace tabulate;
 int StockManager::nextId = 1;
@@ -284,6 +301,22 @@ void StockManager::saveDataToFile()
     setColumnWidths(ws);
     wb.save(filename);
 }
+void invalidTypeMessage()
+{
+    Table invalidTable;
+    invalidTable.add_row({"Invalid type! Only letters and spaces are allowed."});
+    invalidTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << invalidTable;
+    cout << RED << oss.str() << RESET << endl;
+}
 void StockManager::createRecord()
 {
     StockItem item;
@@ -297,17 +330,7 @@ void StockManager::createRecord()
             break;
         else
         {
-            Table invalidTable;
-            invalidTable.add_row({"Invalid type! Only letters and spaces are allowed."});
-            invalidTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
-                .border_top("-")
-                .border_bottom("-")
-                .border_left("|")
-                .border_right("|")
-                .corner("+");
-            cout << RED << invalidTable << RESET << endl;
+            invalidTypeMessage();
         }
     }
     while (true)
@@ -543,10 +566,11 @@ void StockManager::displayData()
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -563,6 +587,31 @@ void StockManager::displayData()
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -708,10 +757,11 @@ void StockManager::searchByType(const string &type) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -728,6 +778,31 @@ void StockManager::searchByType(const string &type) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -826,10 +901,11 @@ void StockManager::searchByBrand(const string &brand) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -846,6 +922,31 @@ void StockManager::searchByBrand(const string &brand) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -944,10 +1045,11 @@ void StockManager::searchByModel(const string &model) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -964,6 +1066,31 @@ void StockManager::searchByModel(const string &model) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -1062,10 +1189,11 @@ void StockManager::filterByYear(int year) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -1082,6 +1210,31 @@ void StockManager::filterByYear(int year) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -1180,10 +1333,11 @@ void StockManager::filterByOrigin(const string &origin) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -1200,6 +1354,31 @@ void StockManager::filterByOrigin(const string &origin) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -1298,10 +1477,11 @@ void StockManager::filterByQuantity(int quantity) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -1318,6 +1498,31 @@ void StockManager::filterByQuantity(int quantity) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -1419,10 +1624,11 @@ void StockManager::filterByPrice(double price) const
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -1439,6 +1645,31 @@ void StockManager::filterByPrice(double price) const
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
@@ -2735,10 +2966,11 @@ void StockManager::viewAllCustomers(const vector<User> &users)
         while (true)
         {
             cout << "Use <- (left), -> (right), or ESC to quit...";
-            int ch = _getch();
+            int ch = getch();
+#ifdef _WIN32
             if (ch == 224)
             {
-                ch = _getch();
+                ch = getch();
                 if (ch == 77 && currentPage < totalPages - 1)
                 {
                     currentPage++;
@@ -2755,6 +2987,31 @@ void StockManager::viewAllCustomers(const vector<User> &users)
                 cout << endl;
                 return;
             }
+#else
+            if (ch == 27)
+            {
+                char next1 = getch();
+                if (next1 == '[')
+                {
+                    char next2 = getch();
+                    if (next2 == 'C' && currentPage < totalPages - 1)
+                    {
+                        currentPage++;
+                        break;
+                    }
+                    else if (next2 == 'D' && currentPage > 0)
+                    {
+                        currentPage--;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << endl;
+                    return;
+                }
+            }
+#endif
             cout << endl;
             Table errorTable;
             errorTable.add_row({"| Invalid input! Use <-, ->, or ESC. |"});
