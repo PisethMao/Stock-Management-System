@@ -123,14 +123,15 @@ void showCustomerMenu()
         {
             StockManager stockManager;
             buyProduct(stockManager);
+            break;
         }
-        break;
         case 5:
         {
             logout();
+            isStayInMenu = false;
             break;
         }
-        default:
+        default:{
             Table invalidTable;
             invalidTable.add_row({"===Invalid Option Please Choose Again from [1-5]==="});
             invalidTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
@@ -139,6 +140,7 @@ void showCustomerMenu()
             cin.ignore();
             cin.get();
             break;
+        }
         }
     }
 }
