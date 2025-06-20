@@ -9,3 +9,4 @@ using namespace tabulate;
 
 // void pressEnterToContinue();
 void buyProduct(StockManager &stockManager);
+void savePurchaseHistory(const StockItem &item, int quantity, double total);
