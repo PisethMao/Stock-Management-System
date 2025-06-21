@@ -7,6 +7,7 @@
 #include "SortFilter.hpp"
 #include "BuyProduct.hpp"
 #include "ClearScreen.hpp"
+#include "Color.hpp"
 #include <iostream>
 #include <limits>
 #include <conio.h>
@@ -18,11 +19,21 @@ using namespace std;
 using namespace tabulate;
 void pressEnterToContinue()
 {
-    cout << "\nPress Enter to return...";
-    // cin.ignore();
+    Table pressTable;
+    pressTable.add_row({"                                             Press Enter to return...                      "});
+    pressTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << pressTable;
+    cout << WHITE << oss.str() << RESET << endl;
     cin.get();
 }
-
 string priceFormat(double price)
 {
     stringstream ss;
@@ -45,38 +56,49 @@ string priceFormat(double price)
     }
     return "$ " + result + dec_part;
 }
-
 void buyProduct(StockManager &manager)
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
-
+    clearScreen();
+    Table buyTable;
+    buyTable.add_row({"                          ===============[ << Purchase Product >> ]===============         "});
+    buyTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << buyTable;
+    cout << BLUE << oss.str() << RESET << endl;
     vector<StockItem> &items = manager.getItems();
-
     if (items.empty())
     {
         cout << "No products available.\n";
         pressEnterToContinue();
         return;
     }
-
-    // Display products
     Table table;
     table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
-
+    table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
     for (const auto &item : items)
     {
         stringstream ss;
         ss << "$ " << fixed << setprecision(2) << item.price;
-
         table.add_row({to_string(item.id), item.type, item.brand, item.model,
                        to_string(item.year), item.origin,
                        (item.quantity == 0 ? "Out of Stock" : to_string(item.quantity)), ss.str()});
+        size_t lastRow = table.size() - 1;
+        table[lastRow][0].format().font_align(FontAlign::center);
+        table[lastRow][1].format().font_align(FontAlign::left);
+        table[lastRow][2].format().font_align(FontAlign::left);
+        table[lastRow][3].format().font_align(FontAlign::left);
+        table[lastRow][4].format().font_align(FontAlign::center);
+        table[lastRow][5].format().font_align(FontAlign::center);
+        table[lastRow][6].format().font_align(FontAlign::center);
+        table[lastRow][7].format().font_align(FontAlign::center);
     }
-
     table.format()
         .font_align(FontAlign::left)
         .font_style({FontStyle::bold})
@@ -85,106 +107,149 @@ void buyProduct(StockManager &manager)
         .border_left("|")
         .border_right("|")
         .corner("+");
-
-    cout << table << endl;
-
+    ostringstream oss1;
+    oss1 << table;
+    cout << BLUE << oss1.str() << RESET << endl;
     int productId = -1;
-    cout << "\nEnter Product ID to buy (or 0 to cancel): ";
+    cout << MAGENTA << "|>> Enter Product ID to buy (or 0 to cancel): ";
     while (!(cin >> productId))
     {
+        cout << RESET;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input. Please enter a number: ";
+        cout << MAGENTA << "|>> Invalid input. Please enter a number: ";
     }
-
     if (productId == 0)
     {
-        cout << "Purchase cancelled.\n";
+        Table purchaseTable;
+        purchaseTable.add_row({"                                   Purchase cancelled.                                     "});
+        purchaseTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        ostringstream oss1;
+        oss1 << purchaseTable;
+        cout << YELLOW << oss1.str() << RESET << endl;
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear leftover newline
         pressEnterToContinue();
         return;
     }
-
-    // Find product
     auto it = find_if(items.begin(), items.end(), [&](const StockItem &item)
                       { return item.id == productId; });
-
     if (it == items.end())
     {
-        cout << "Product not found.\n";
+        string productNotFound = "                                                              Product not found with ID: " + to_string(productId);
+        Table notFoundTable;
+        notFoundTable.add_row({productNotFound});
+        notFoundTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        ostringstream oss1;
+        oss1 << notFoundTable;
+        cout << YELLOW << oss1.str() << RESET << endl;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         pressEnterToContinue();
         return;
     }
-
     int quantity = -1;
-    cout << "Enter quantity to buy (or 0 to cancel): ";
+    cout << MAGENTA << "|>> Enter quantity to buy (or 0 to cancel): ";
     while (!(cin >> quantity))
     {
+        cout << RESET;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Invalid input. Please enter a number: ";
+        cout << MAGENTA << "|>> Invalid input. Please enter a number: ";
     }
-
     if (quantity == 0)
     {
-        cout << "Purchase cancelled.\n";
+        Table purchaseTable;
+        purchaseTable.add_row({"                                   Purchase cancelled.                                     "});
+        purchaseTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        ostringstream oss1;
+        oss1 << purchaseTable;
+        cout << YELLOW << oss1.str() << RESET << endl;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         pressEnterToContinue();
         return;
     }
-
     if (quantity < 0 || quantity > it->quantity)
     {
-        cout << "Invalid quantity. Only " << it->quantity << " available.\n";
+        string invalidQuantity = "                 Invalid quantity. Only " + to_string(it->quantity) + "available.                                        ";
+        Table quantityTable;
+        quantityTable.add_row({invalidQuantity});
+        quantityTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        ostringstream oss1;
+        oss1 << quantityTable;
+        cout << YELLOW << oss1.str() << RESET << endl;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         pressEnterToContinue();
         return;
     }
-
-    // Purchase success
     double total = quantity * it->price;
     it->quantity -= quantity;
-    manager.saveDataToFile(); // Persist changes
+    manager.saveDataToFile();
     savePurchaseHistory(*it, quantity, total);
-
-    // cout << "\n=== Purchase Summary ===\n";
-    // cout << "Product: " << it->type << " - " << it->brand << " (" << it->model << ")\n";
-    // cout << "Quantity: " << quantity << "\n";
-    // cout << "Unit Price: $" << fixed << setprecision(2) << it->price << "\n";
-    // cout << "Total Price: $" << fixed << setprecision(2) << total << "\n";
-    // cout << "\nPurchase Successful!\n";
-
     Table summaryTable;
-summaryTable.add_row({"=== Purchase Summary ==="});
-summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-summaryTable.add_row({"Product", it->type + " - " + it->brand + " (" + it->model + ")"});
-summaryTable.add_row({"Quantity", to_string(quantity)});
-summaryTable.add_row({"Unit Price", priceFormat(it->price)});
-summaryTable.add_row({"Total Price", priceFormat(total)});
-summaryTable.format()
-    .font_align(FontAlign::left)
-    .font_style({FontStyle::bold})
-    .border_top("-")
-    .border_bottom("-")
-    .border_left("|")
-    .border_right("|")
-    .corner("+");
-
-cout << summaryTable << endl;
-
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+    summaryTable.add_row({"=== Purchase Summary ==="});
+    summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+    summaryTable.add_row({"Product", it->type + " - " + it->brand + " (" + it->model + ")"});
+    summaryTable.add_row({"Quantity", to_string(quantity)});
+    summaryTable.add_row({"Unit Price", priceFormat(it->price)});
+    summaryTable.add_row({"Total Price", priceFormat(total)});
+    summaryTable.format()
+        .font_align(FontAlign::left)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    cout << summaryTable << endl;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+    Table done;
+    done.add_row({"Purchase completed successfully!"});
+    done.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss2;
+    oss2 << done;
+    cout << GREEN << oss2.str() << RESET << endl;
     pressEnterToContinue();
 }
-
-
 void savePurchaseHistory(const StockItem &item, int quantity, double total)
 {
     string filename = "buy_history.xlsx";
     xlnt::workbook wb;
     xlnt::worksheet ws;
-
-    // Load existing if file exists
     if (std::filesystem::exists(filename))
     {
         wb.load(filename);
@@ -194,8 +259,6 @@ void savePurchaseHistory(const StockItem &item, int quantity, double total)
     {
         ws = wb.active_sheet();
         ws.title("Purchase History");
-
-        // Add headers
         ws.cell("A1").value("ID");
         ws.cell("B1").value("Type");
         ws.cell("C1").value("Brand");
@@ -217,15 +280,11 @@ void savePurchaseHistory(const StockItem &item, int quantity, double total)
         ws.cell("I1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("J1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     }
-
     int row = static_cast<int>(ws.highest_row()) + 1;
-
-    // Get current date
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
     std::stringstream dateStream;
     dateStream << std::put_time(std::localtime(&now_time), "%Y-%m-%d %H:%M:%S");
-
     ws.cell("A" + std::to_string(row)).value(item.id);
     ws.cell("A" + std::to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     ws.cell("B" + std::to_string(row)).value(item.type);
@@ -244,6 +303,5 @@ void savePurchaseHistory(const StockItem &item, int quantity, double total)
     ws.cell("I" + std::to_string(row)).value(priceFormat(total));
     ws.cell("I" + std::to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     ws.cell("J" + std::to_string(row)).value(dateStream.str());
-
     wb.save(filename);
 }
