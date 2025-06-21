@@ -26,7 +26,9 @@ void pressEnter()
         .border_left("|")
         .border_right("|")
         .corner("+");
-    cout << pressTable << endl;
+    ostringstream oss;
+    oss << pressTable;
+    cout << WHITE << oss.str() << RESET << endl;
     cin.get();
 }
 void adminMenu()
