@@ -212,13 +212,50 @@ void buyProduct(StockManager &manager)
     it->quantity -= quantity;
     manager.saveDataToFile();
     savePurchaseHistory(*it, quantity, total);
+    // Table summaryTable;
+    // summaryTable.add_row({"=== Purchase Summary ==="});
+    // summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+    // summaryTable.add_row({"Product", it->type + " - " + it->brand + " (" + it->model + ")"});
+    // summaryTable.add_row({"Quantity", to_string(quantity)});
+    // summaryTable.add_row({"Unit Price", priceFormat(it->price)});
+    // summaryTable.add_row({"Total Price", priceFormat(total)});
+    // summaryTable.format()
+    //     .font_align(FontAlign::left)
+    //     .font_style({FontStyle::bold})
+    //     .border_top("-")
+    //     .border_bottom("-")
+    //     .border_left("|")
+    //     .border_right("|")
+    //     .corner("+");
+    // cout << summaryTable << endl;
+    // cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // cin.get();
+
+    // cout << "\n=== Purchase Summary ===\n";
+    // cout << "Product: " << it->type << " - " << it->brand << " (" << it->model << ")\n";
+    // cout << "Quantity: " << quantity << endl;
+    // cout << "Unit Price: $" << fixed << setprecision(2) << it->price << endl;
+    // cout << "Total Price: $" << fixed << setprecision(2) << total << endl;
+
+    // cout << "\nPurchase successful!\n";
+
+    // Table testTable;
+    // testTable.add_row({"Label", "Value"});
+    // testTable.add_row({"Quantity", to_string(quantity)});
+    // testTable.add_row({"Price", priceFormat(it->price)});
+    // testTable.format().font_align(FontAlign::center);
+    // cout << testTable << endl;
+
     Table summaryTable;
-    summaryTable.add_row({"=== Purchase Summary ==="});
-    summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+    summaryTable.add_row({"Field", "Value"});
+    summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_bottom("-");
+
+    // Add content rows
     summaryTable.add_row({"Product", it->type + " - " + it->brand + " (" + it->model + ")"});
     summaryTable.add_row({"Quantity", to_string(quantity)});
     summaryTable.add_row({"Unit Price", priceFormat(it->price)});
     summaryTable.add_row({"Total Price", priceFormat(total)});
+
     summaryTable.format()
         .font_align(FontAlign::left)
         .font_style({FontStyle::bold})
@@ -227,9 +264,17 @@ void buyProduct(StockManager &manager)
         .border_left("|")
         .border_right("|")
         .corner("+");
-    cout << summaryTable << endl;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    cin.get();
+
+    ostringstream ossSummary;
+    ossSummary << summaryTable;
+    cout << BLUE << "\n"
+         << ossSummary.str() << RESET << endl;
+
+    if (cin.peek() == '\n')
+        cin.get(); // clear newline left from previous input
+    // cout << "\nPress Enter to continue...";
+    // cin.get();
+
     Table done;
     done.add_row({"Purchase completed successfully!"});
     done.format()
@@ -260,15 +305,25 @@ void savePurchaseHistory(const StockItem &item, int quantity, double total)
         ws = wb.active_sheet();
         ws.title("Purchase History");
         ws.cell("A1").value("ID");
+        ws.cell("A1").font(xlnt::font().bold(true));
         ws.cell("B1").value("Type");
+        ws.cell("B1").font(xlnt::font().bold(true));
         ws.cell("C1").value("Brand");
+        ws.cell("C1").font(xlnt::font().bold(true));
         ws.cell("D1").value("Model");
+        ws.cell("D1").font(xlnt::font().bold(true));
         ws.cell("E1").value("Year");
+        ws.cell("E1").font(xlnt::font().bold(true));
         ws.cell("F1").value("Origin");
+        ws.cell("F1").font(xlnt::font().bold(true));
         ws.cell("G1").value("Quantity");
+        ws.cell("G1").font(xlnt::font().bold(true));
         ws.cell("H1").value("Unit Price");
+        ws.cell("H1").font(xlnt::font().bold(true));
         ws.cell("I1").value("Total Price");
+        ws.cell("I1").font(xlnt::font().bold(true));
         ws.cell("J1").value("Purchase Date");
+        ws.cell("J1").font(xlnt::font().bold(true));
         ws.cell("A1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("B1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
         ws.cell("C1").alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
@@ -303,5 +358,10 @@ void savePurchaseHistory(const StockItem &item, int quantity, double total)
     ws.cell("I" + std::to_string(row)).value(priceFormat(total));
     ws.cell("I" + std::to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
     ws.cell("J" + std::to_string(row)).value(dateStream.str());
+    ws.cell("J" + std::to_string(row)).alignment(xlnt::alignment().horizontal(xlnt::horizontal_alignment::center));
+
+    ws.column_properties("A").width = 8;
+    ws.column_properties("J").width = 25;
+    ws.column_properties("D").width = 25;
     wb.save(filename);
 }

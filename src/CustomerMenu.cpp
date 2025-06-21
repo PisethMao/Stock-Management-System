@@ -9,6 +9,7 @@
 #include "Logout.hpp"
 #include "ClearScreen.hpp"
 #include "Color.hpp"
+#include "AdminMenu.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -27,6 +28,7 @@ void showCustomerMenu()
         customerMenu.add_row({"3. Sort/Filter Products"});
         customerMenu.add_row({"4. Buy Product"});
         customerMenu.add_row({"5. Logout"});
+        customerMenu.add_row({"6. Exit Program"});
         customerMenu.format()
             .font_align(FontAlign::left)
             .border_top("-")
@@ -39,8 +41,8 @@ void showCustomerMenu()
         cout << BLUE << oss.str() << RESET << endl;
         while (true)
         {
-            cout << MAGENTA << "|>> Choose your choice from [1-5]: ";
-            if (cin >> choice && choice >= 1 && choice <= 5)
+            cout << MAGENTA << "|>> Choose your choice from [1-6]: ";
+            if (cin >> choice && choice >= 1 && choice <= 6)
             {
                 cout << RESET;
                 break;
@@ -48,7 +50,7 @@ void showCustomerMenu()
             else
             {
                 Table invalidTable;
-                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 5."});
+                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 6."});
                 invalidTable.format()
                     .font_align(FontAlign::center)
                     .font_style({FontStyle::bold})
@@ -92,6 +94,26 @@ void showCustomerMenu()
         {
             logout();
             isStayInMenu = false;
+            break;
+        }
+        case 6:
+        {
+            Table exitTable;
+            exitTable.add_row({"                                    Exit the Program.                                       "});
+            exitTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            ostringstream oss;
+            oss << exitTable;
+            cout << BLUE << oss.str() << RESET << endl;
+            cin.ignore();
+            pressEnter();
+            exit(0);
             break;
         }
         default:
