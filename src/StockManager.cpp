@@ -2024,19 +2024,86 @@ void StockManager::updateRecord()
         if (item.id == id)
         {
             isFound = true;
-            Table foundTable;
-            foundTable.add_row({"                                                                 Updating record with ID: " + to_string(id)});
-            foundTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
+            Table table;
+            table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+            table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+            table.column(0).format().width(4);
+            table.column(1).format().width(13);
+            table.column(2).format().width(9);
+            table.column(3).format().width(20);
+            table.column(4).format().width(6);
+            table.column(5).format().width(13);
+            table.column(6).format().width(10);
+            table.column(7).format().width(12);
+            locale current_locale("");
+            cout.imbue(current_locale);
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << item.price;
+            string quantityDisplay = (item.quantity == 0) ? "Out Of Stock" : to_string(item.quantity);
+            table.add_row({to_string(item.id), item.type, item.brand, item.model, to_string(item.year), item.origin, quantityDisplay, ss_price.str()});
+            table[1][0].format().font_align(FontAlign::center);
+            table[1][1].format().font_align(FontAlign::left);
+            table[1][2].format().font_align(FontAlign::left);
+            table[1][3].format().font_align(FontAlign::left);
+            table[1][4].format().font_align(FontAlign::center);
+            table[1][5].format().font_align(FontAlign::center);
+            table[1][6].format().font_align(FontAlign::center);
+            table[1][7].format().font_align(FontAlign::center);
+            table.format()
                 .border_top("-")
                 .border_bottom("-")
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
             ostringstream oss;
-            oss << foundTable;
+            oss << table;
             cout << BLUE << oss.str() << RESET << endl;
+            string confirm;
+            while (true)
+            {
+                cout << YELLOW << "|>> Do you want to update this record? (y/n): ";
+                cin >> confirm;
+                cout << RESET;
+                if (confirm == "y" || confirm == "Y")
+                {
+                    break;
+                }
+                else if (confirm == "n" || confirm == "N")
+                {
+                    Table cancelTable;
+                    cancelTable.add_row({"                                      Update canceled by admin.                             "});
+                    cancelTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    ostringstream oss;
+                    oss << cancelTable;
+                    cout << YELLOW << oss.str() << RESET << endl;
+                    return;
+                }
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"                          Invalid input! Please enter only 'y' or 'n'.                      "});
+                    invalidTable.format()
+                        .font_align(FontAlign::center)
+                        .font_style({FontStyle::bold})
+                        .border_top("-")
+                        .border_bottom("-")
+                        .border_left("|")
+                        .border_right("|")
+                        .corner("+");
+                    cout << RED << invalidTable << RESET << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
+            cin.ignore();
             while (true)
             {
                 cout << MAGENTA << "|>> Enter type of product: ";
@@ -2200,21 +2267,79 @@ void StockManager::deleteRecord()
         if (it->id == id)
         {
             isFound = true;
-            items.erase(it);
-            Table successTable;
-            successTable.add_row({"                            Record with ID " + to_string(id) + " deleted successfully.                          "});
-            successTable.format()
-                .font_align(FontAlign::center)
-                .font_style({FontStyle::bold})
+            Table table;
+            table.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin", "Quantity", "Price"});
+            table[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
+            table.column(0).format().width(4);
+            table.column(1).format().width(13);
+            table.column(2).format().width(9);
+            table.column(3).format().width(20);
+            table.column(4).format().width(6);
+            table.column(5).format().width(13);
+            table.column(6).format().width(10);
+            table.column(7).format().width(12);
+            locale current_locale("");
+            cout.imbue(current_locale);
+            stringstream ss_price;
+            ss_price.imbue(current_locale);
+            ss_price << "$ " << fixed << setprecision(2) << it->price;
+            string quantityDisplay = (it->quantity == 0) ? "Out Of Stock" : to_string(it->quantity);
+            table.add_row({to_string(it->id), it->type, it->brand, it->model, to_string(it->year), it->origin, quantityDisplay, ss_price.str()});
+            table[1][0].format().font_align(FontAlign::center);
+            table[1][1].format().font_align(FontAlign::left);
+            table[1][2].format().font_align(FontAlign::left);
+            table[1][3].format().font_align(FontAlign::left);
+            table[1][4].format().font_align(FontAlign::center);
+            table[1][5].format().font_align(FontAlign::center);
+            table[1][6].format().font_align(FontAlign::center);
+            table[1][7].format().font_align(FontAlign::center);
+            table.format()
                 .border_top("-")
                 .border_bottom("-")
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
             ostringstream oss;
-            oss << successTable;
-            cout << GREEN << oss.str() << RESET << endl;
-            saveDataToFile();
+            oss << table;
+            cout << BLUE << oss.str() << RESET << endl;
+            string confirm;
+            while (true)
+            {
+                cout << YELLOW << "|>> Do you want to delete this record? (y/n): ";
+                cin >> confirm;
+                cout << RESET;
+                if (confirm == "y" || confirm == "Y")
+                {
+                    items.erase(it);
+                    Table successTable;
+                    successTable.add_row({"                            Record with ID " + to_string(id) + " deleted successfully.                          "});
+                    successTable.format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+                    ostringstream oss;
+                    oss << successTable;
+                    cout << GREEN << oss.str() << RESET << endl;
+                    saveDataToFile();
+                    break;
+                }
+                else if (confirm == "n" || confirm == "N")
+                {
+                    Table cancelTable;
+                    cancelTable.add_row({"                             Delete operation canceled by admin.                            "});
+                    cancelTable.format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+                    cout << YELLOW << cancelTable << RESET << endl;
+                    break;
+                }
+                else
+                {
+                    Table invalidTable;
+                    invalidTable.add_row({"                             Invalid input! Please enter only 'y' or 'n'.                   "});
+                    invalidTable.format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
+                    ostringstream oss;
+                    oss << invalidTable;
+                    cout << RED << oss.str() << RESET << endl;
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
             break;
         }
     }

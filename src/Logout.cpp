@@ -13,7 +13,7 @@ using namespace std;
 using namespace tabulate;
 void invalidInput()
 {
-    string errorMsg = "                 Invalid input. Please type yes or no.                  ";
+    string errorMsg = "     Invalid input. Please type yes or no.       ";
     Table invalidTable;
     invalidTable.add_row({errorMsg});
     invalidTable.format()
@@ -30,7 +30,7 @@ void invalidInput()
 }
 void logoutSuccessMessage()
 {
-    string message = "            You have successfully logged out. Thank you!                 ";
+    string message = "  You have successfully logged out. Thank you!   ";
     Table successTable;
     successTable.add_row({message});
     successTable.format()
@@ -48,7 +48,7 @@ void logoutSuccessMessage()
 void press()
 {
     Table pressTable;
-    pressTable.add_row({"Press Enter to continue..."});
+    pressTable.add_row({"            Press Enter to continue...           "});
     pressTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -57,7 +57,9 @@ void press()
         .border_left("|")
         .border_right("|")
         .corner("+");
-    cout << pressTable << endl;
+    ostringstream oss;
+    oss << pressTable;
+    cout << WHITE << oss.str() << RESET << endl;
     cin.get();
 }
 void logout()
@@ -66,8 +68,9 @@ void logout()
     while (isStayInMenu)
     {
         string choice;
-        cout << "Are you sure you want to logout? (yes or no): ";
+        cout << YELLOW << "|>> Are you sure you want to logout? (yes or no): ";
         getline(cin >> ws, choice);
+        cout << RESET;
         if (choice == "yes" || choice == "y")
         {
             logoutSuccessMessage();

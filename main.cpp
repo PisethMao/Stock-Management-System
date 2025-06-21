@@ -167,6 +167,7 @@ int main()
             passwordMap[user.getUsername()] = user.getPassword();
         }
         StockManager stockManager;
+        stockManager.loadDataFromFile();
         User *currentUser = nullptr;
         while (currentUser == nullptr)
         {

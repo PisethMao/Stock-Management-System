@@ -212,50 +212,13 @@ void buyProduct(StockManager &manager)
     it->quantity -= quantity;
     manager.saveDataToFile();
     savePurchaseHistory(*it, quantity, total);
-    // Table summaryTable;
-    // summaryTable.add_row({"=== Purchase Summary ==="});
-    // summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-    // summaryTable.add_row({"Product", it->type + " - " + it->brand + " (" + it->model + ")"});
-    // summaryTable.add_row({"Quantity", to_string(quantity)});
-    // summaryTable.add_row({"Unit Price", priceFormat(it->price)});
-    // summaryTable.add_row({"Total Price", priceFormat(total)});
-    // summaryTable.format()
-    //     .font_align(FontAlign::left)
-    //     .font_style({FontStyle::bold})
-    //     .border_top("-")
-    //     .border_bottom("-")
-    //     .border_left("|")
-    //     .border_right("|")
-    //     .corner("+");
-    // cout << summaryTable << endl;
-    // cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    // cin.get();
-
-    // cout << "\n=== Purchase Summary ===\n";
-    // cout << "Product: " << it->type << " - " << it->brand << " (" << it->model << ")\n";
-    // cout << "Quantity: " << quantity << endl;
-    // cout << "Unit Price: $" << fixed << setprecision(2) << it->price << endl;
-    // cout << "Total Price: $" << fixed << setprecision(2) << total << endl;
-
-    // cout << "\nPurchase successful!\n";
-
-    // Table testTable;
-    // testTable.add_row({"Label", "Value"});
-    // testTable.add_row({"Quantity", to_string(quantity)});
-    // testTable.add_row({"Price", priceFormat(it->price)});
-    // testTable.format().font_align(FontAlign::center);
-    // cout << testTable << endl;
-
     Table summaryTable;
     summaryTable.add_row({"Field", "Value"});
     summaryTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold}).border_bottom("-");
-
-    // Add content rows
     summaryTable.add_row({"Product", it->type + " - " + it->brand + " (" + it->model + ")"});
     summaryTable.add_row({"Quantity", to_string(quantity)});
     summaryTable.add_row({"Unit Price", priceFormat(it->price)});
     summaryTable.add_row({"Total Price", priceFormat(total)});
-
     summaryTable.format()
         .font_align(FontAlign::left)
         .font_style({FontStyle::bold})
@@ -264,19 +227,16 @@ void buyProduct(StockManager &manager)
         .border_left("|")
         .border_right("|")
         .corner("+");
-
+    summaryTable.column(0).format().width(50);
+    summaryTable.column(1).format().width(42);
     ostringstream ossSummary;
     ossSummary << summaryTable;
     cout << BLUE << "\n"
          << ossSummary.str() << RESET << endl;
-
     if (cin.peek() == '\n')
-        cin.get(); // clear newline left from previous input
-    // cout << "\nPress Enter to continue...";
-    // cin.get();
-
+        cin.get();
     Table done;
-    done.add_row({"Purchase completed successfully!"});
+    done.add_row({"                                                           Purchase completed successfully!"});
     done.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})

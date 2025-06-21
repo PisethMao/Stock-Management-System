@@ -99,7 +99,7 @@ void showCustomerMenu()
         case 6:
         {
             Table exitTable;
-            exitTable.add_row({"                                    Exit the Program.                                       "});
+            exitTable.add_row({"                   Exit the Program.             "});
             exitTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -112,7 +112,20 @@ void showCustomerMenu()
             oss << exitTable;
             cout << BLUE << oss.str() << RESET << endl;
             cin.ignore();
-            pressEnter();
+            Table pressTable;
+            pressTable.add_row({"             Press Enter to continue...          "});
+            pressTable.format()
+                .font_align(FontAlign::center)
+                .font_style({FontStyle::bold})
+                .border_top("-")
+                .border_bottom("-")
+                .border_left("|")
+                .border_right("|")
+                .corner("+");
+            ostringstream oss1;
+            oss1 << pressTable;
+            cout << WHITE << oss1.str() << RESET << endl;
+            cin.get();
             exit(0);
             break;
         }
