@@ -4,6 +4,7 @@
 #include "StockManager.hpp"
 #include "AdminMenu.hpp"
 #include "ClearScreen.hpp"
+#include "Color.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -24,7 +25,7 @@ void viewProducts()
     StockManager stockManager;
     stockManager.displayData();
     Table pressTable;
-    pressTable.add_row({"Press Enter to Return to Main Menu..."});
+    pressTable.add_row({"                            Press Enter to Return to Main Menu...                           "});
     pressTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -33,7 +34,9 @@ void viewProducts()
         .border_left("|")
         .border_right("|")
         .corner("+");
-    cout << pressTable << endl;
+    ostringstream oss;
+    oss << pressTable;
+    cout << WHITE << oss.str() << RESET << endl;
     cin.ignore();
     cin.get();
 }

@@ -8,6 +8,7 @@
 #include "BuyProduct.hpp"
 #include "Logout.hpp"
 #include "ClearScreen.hpp"
+#include "Color.hpp"
 #include <iostream>
 using namespace std;
 using namespace tabulate;
@@ -18,31 +19,8 @@ void showCustomerMenu()
     {
         clearScreen();
         int choice;
-        Table menu;
-        menu.add_row({" Customer Menu "});
-        menu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-        menu.add_row({""});
-        menu[1].format().border_bottom("-");
-        auto addSection = [&](const vector<string> &items)
-        {
-            for (const auto &item : items)
-            {
-                menu.add_row({item});
-            }
-            menu.add_row({""});
-            menu[menu.size() - 1].format().border_bottom("-");
-        };
-        vector<string> productItems = {
-            "1. View Products",
-            "2. Search/Filter Products",
-            "3. Sort Products",
-            "4. Buy Product",
-            "5. Logout"};
-        addSection(productItems);
-        menu.format();
-        // clearScreen();
         Table customerMenu;
-        customerMenu.add_row({"=== Customer Menu ==="});
+        customerMenu.add_row({"             === Customer Menu ===               "});
         customerMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
         customerMenu.add_row({"1. View Available Products"});
         customerMenu.add_row({"2. Search Products"});
@@ -56,12 +34,15 @@ void showCustomerMenu()
             .border_left("|")
             .border_right("|")
             .corner("+");
-        cout << menu << endl;
+        ostringstream oss;
+        oss << customerMenu;
+        cout << BLUE << oss.str() << RESET << endl;
         while (true)
         {
-            cout << "Choose your choice from [1-5]: ";
+            cout << MAGENTA << "|>> Choose your choice from [1-5]: ";
             if (cin >> choice && choice >= 1 && choice <= 5)
             {
+                cout << RESET;
                 break;
             }
             else
@@ -76,32 +57,14 @@ void showCustomerMenu()
                     .border_left("|")
                     .border_right("|")
                     .corner("+");
-                cout << invalidTable << endl;
+                ostringstream oss;
+                oss << invalidTable;
+                cout << RED << oss.str() << RESET << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 continue;
             }
         }
-
-        // int choice;
-        // Table customerMenu;
-        // customerMenu.add_row({"=== Customer Menu ==="});
-        // customerMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
-        // customerMenu.add_row({"1. View Available Products"});
-        // customerMenu.add_row({"2. Search Products"});
-        // customerMenu.add_row({"3. Sort/Filter Products"});
-        // customerMenu.add_row({"4. Buy Product"});
-        // customerMenu.add_row({"5. Logout"});
-        // customerMenu.format()
-        //     .font_align(FontAlign::left)
-        //     .border_top("-")
-        //     .border_bottom("-")
-        //     .border_left("|")
-        //     .border_right("|")
-        //     .corner("+");
-        // cout << customerMenu << endl;
-        // cout << "Choose your choice [1-5]: ";
-        // cin >> choice;
         switch (choice)
         {
         case 1:
@@ -131,7 +94,8 @@ void showCustomerMenu()
             isStayInMenu = false;
             break;
         }
-        default:{
+        default:
+        {
             Table invalidTable;
             invalidTable.add_row({"===Invalid Option Please Choose Again from [1-5]==="});
             invalidTable[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
