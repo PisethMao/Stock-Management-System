@@ -4,5 +4,4 @@
 #include <algorithm>
 #include "StockManager.hpp"
 using namespace std;
-
 void sortFilterMenu(StockManager &stockManager);

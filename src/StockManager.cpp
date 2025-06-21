@@ -1156,7 +1156,7 @@ void StockManager::searchByModel(const string &model) const
     {
         clearScreen();
         Table title;
-        title.add_row({"        ========[ << Search Results by Model: " + model + " >> ]========                "});
+        title.add_row({"       ========[ << Search Results by Model: " + model + " >> ]========                "});
         title.format().font_style({FontStyle::bold}).font_align(FontAlign::center).border_top("-").border_bottom("-").border_left("|").border_right("|").corner("+");
         ostringstream oss;
         oss << title;

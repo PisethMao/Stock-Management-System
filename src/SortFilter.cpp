@@ -4,11 +4,12 @@
 #include "CustomerMenu.hpp"
 #include "StockManager.hpp"
 #include "ClearScreen.hpp"
+#include "Color.hpp"
 using namespace tabulate;
 void PressEnter()
 {
     Table pressTable;
-    pressTable.add_row({"Press Enter to continue..."});
+    pressTable.add_row({"                                             Press Enter to continue...                     "});
     pressTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -17,7 +18,9 @@ void PressEnter()
         .border_left("|")
         .border_right("|")
         .corner("+");
-    cout << pressTable << endl;
+    ostringstream oss;
+    oss << pressTable;
+    cout << WHITE << oss.str() << RESET << endl;
     cin.get();
 }
 void sortFilterMenu(StockManager &stockManager)
@@ -29,7 +32,8 @@ void sortFilterMenu(StockManager &stockManager)
         clearScreen();
         int subChoice;
         Table sortMenu;
-        sortMenu.add_row({"===============[ << Sort Menu >> ]==============="});
+        sortMenu.add_row({"                                           ===============[ << Sort Menu >> ]==============="});
+        sortMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
         sortMenu.add_row({"1. Sort Ascending by ID"});
         sortMenu.add_row({"2. Sort Descending by ID"});
         sortMenu.add_row({"3. Sort Ascending by Type"});
@@ -42,8 +46,8 @@ void sortFilterMenu(StockManager &stockManager)
         sortMenu.add_row({"10. Sort Descending by Year"});
         sortMenu.add_row({"11. Sort Ascending by Origin"});
         sortMenu.add_row({"12. Sort Descending by Origin"});
-        sortMenu.add_row({"13. Sort Ascending by Quatity"});
-        sortMenu.add_row({"14. Sort Descending by Quatity"});
+        sortMenu.add_row({"13. Sort Ascending by Quantity"});
+        sortMenu.add_row({"14. Sort Descending by Quantity"});
         sortMenu.add_row({"15. Sort Ascending by Price"});
         sortMenu.add_row({"16. Sort Descending by Price"});
         sortMenu.add_row({"17. Exit Case Sort Menu"});
@@ -54,12 +58,15 @@ void sortFilterMenu(StockManager &stockManager)
             .border_left("|")
             .border_right("|")
             .corner("+");
-        cout << sortMenu << endl;
-        cout << "Choose an option from [1-17]: ";
+        ostringstream oss;
+        oss << sortMenu;
+        cout << BLUE << oss.str() << RESET << endl;
+        cout << MAGENTA << "|>> Choose an option from [1-17]: ";
         if (!(cin >> subChoice) || subChoice < 1 || subChoice > 17)
         {
+            cout << RESET;
             Table invalidTable;
-            invalidTable.add_row({"Invalid input! Please enter a number from 1 to 17."});
+            invalidTable.add_row({"                                          Invalid input! Please enter a number from 1 to 17."});
             invalidTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -68,7 +75,9 @@ void sortFilterMenu(StockManager &stockManager)
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << invalidTable << endl;
+            ostringstream oss;
+            oss << invalidTable;
+            cout << RED << oss.str() << RESET << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
@@ -205,7 +214,7 @@ void sortFilterMenu(StockManager &stockManager)
         case 17:
         {
             Table exitTable;
-            exitTable.add_row({"Exit the case sort menu."});
+            exitTable.add_row({"                                                Exit the case sort menu.                    "});
             exitTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -214,7 +223,9 @@ void sortFilterMenu(StockManager &stockManager)
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << exitTable << endl;
+            ostringstream oss;
+            oss << exitTable;
+            cout << BLUE << oss.str() << RESET << endl;
             cin.ignore();
             PressEnter();
             isStayInSortMenu = false;
@@ -223,7 +234,7 @@ void sortFilterMenu(StockManager &stockManager)
         default:
         {
             Table warningTable;
-            warningTable.add_row({"Invalid choice! Please select an option from the menu."});
+            warningTable.add_row({"                                      Invalid choice! Please select an option from the menu."});
             warningTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -232,7 +243,9 @@ void sortFilterMenu(StockManager &stockManager)
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << warningTable << endl;
+            ostringstream oss;
+            oss << warningTable;
+            cout << RED << oss.str() << RESET << endl;
             PressEnter();
             break;
         }
