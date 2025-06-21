@@ -10,12 +10,14 @@
 #include <unordered_map>
 #include <algorithm>
 #include <stdexcept>
+#include <thread>
+#include <chrono>
 using namespace std;
 using namespace tabulate;
 void pressEnter()
 {
     Table pressTable;
-    pressTable.add_row({"Press Enter to continue..."});
+    pressTable.add_row({"                                 Press Enter to continue...                                 "});
     pressTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -30,7 +32,7 @@ void pressEnter()
 void adminMenu()
 {
     Table menu;
-    menu.add_row({"      Admin Panel - Stock Management System       "});
+    menu.add_row({"                                                Admin Panel - Stock Management System       "});
     menu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
     menu.add_row({""});
     menu[1].format().border_bottom("-");
@@ -76,7 +78,7 @@ void adminMenu()
 void invalidMessage()
 {
     Table invalidTable;
-    invalidTable.add_row({"Invalid input! Please enter a number from 1 to 10."});
+    invalidTable.add_row({"                        Invalid input! Please enter a number from 1 to 10.                  "});
     invalidTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -119,7 +121,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         {
             clearScreen();
             Table createTable;
-            createTable.add_row({"===============[ << Create A New Records >> ]==============="});
+            createTable.add_row({"                       ===============[ << Create A New Records >> ]===============         "});
             createTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -128,7 +130,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << BLUE << createTable << RESET << endl;
+            ostringstream oss;
+            oss << createTable;
+            cout << BLUE << oss.str() << RESET << endl;
             stockManager.createRecord();
             break;
         }
@@ -147,7 +151,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 clearScreen();
                 int subChoice;
                 Table searchAndFilterMenu;
-                searchAndFilterMenu.add_row({"===============[ << Search & Filter Menu >> ]==============="});
+                searchAndFilterMenu.add_row({"                 ===============[ << Search & Filter Menu >> ]===============               "});
                 searchAndFilterMenu.add_row({"1. Search by ID"});
                 searchAndFilterMenu.add_row({"2. Search by Type"});
                 searchAndFilterMenu.add_row({"3. Search by Brand"});
@@ -157,6 +161,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 searchAndFilterMenu.add_row({"7. Filter by Quatity"});
                 searchAndFilterMenu.add_row({"8. Filter by Price"});
                 searchAndFilterMenu.add_row({"9. Exit Case Search & Filter Menu"});
+                searchAndFilterMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
                 searchAndFilterMenu.format()
                     .font_align(FontAlign::left)
                     .border_top("-")
@@ -164,12 +169,15 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                     .border_left("|")
                     .border_right("|")
                     .corner("+");
-                cout << searchAndFilterMenu << endl;
-                cout << "Choose an option from [1-9]: ";
+                ostringstream oss;
+                oss << searchAndFilterMenu;
+                cout << BLUE << oss.str() << RESET << endl;
+                cout << MAGENTA << "|>> Choose an option from [1-9]: ";
                 if (!(cin >> subChoice) || subChoice < 1 || subChoice > 9)
                 {
+                    cout << RESET;
                     Table invalidTable;
-                    invalidTable.add_row({"Invalid input! Please enter a number from 1 to 9."});
+                    invalidTable.add_row({"                     Invalid input! Please enter a number from 1 to 9.                      "});
                     invalidTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -178,7 +186,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << invalidTable << endl;
+                    ostringstream oss;
+                    oss << invalidTable;
+                    cout << RED << oss.str() << RESET << endl;
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 }
@@ -188,7 +198,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Search By ID >> ]==============="});
+                    displayTable.add_row({"                  ===============[ << Search By ID >> ]===============                      "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -197,19 +207,22 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     int id;
                     while (true)
                     {
-                        cout << "Enter ID to search: ";
+                        cout << MAGENTA << "|>> Enter ID to search: ";
                         if ((cin >> id) && id > 0)
                         {
+                            cout << RESET;
                             break;
                         }
                         else
                         {
                             Table errorTable;
-                            errorTable.add_row({"Invalid ID! Please enter a positive number only."});
+                            errorTable.add_row({"                      Invalid ID! Please enter a positive number only.                      "});
                             errorTable.format()
                                 .font_align(FontAlign::center)
                                 .font_style({FontStyle::bold})
@@ -218,7 +231,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                                 .border_left("|")
                                 .border_right("|")
                                 .corner("+");
-                            cout << errorTable << endl;
+                            ostringstream oss;
+                            oss << errorTable;
+                            cout << RED << oss.str() << RESET << endl;
                             cin.clear();
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         }
@@ -232,7 +247,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Search By Type >> ]==============="});
+                    displayTable.add_row({"                    ===============[ << Search By Type >> ]===============                  "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -241,12 +256,15 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     string type;
                     while (true)
                     {
-                        cout << "Enter type to search: ";
+                        cout << MAGENTA << "|>> Enter type to search: ";
                         getline(cin >> ws, type);
+                        cout << RESET;
                         bool isValid = !type.empty();
                         for (char c : type)
                         {
@@ -264,7 +282,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         else
                         {
                             Table invalidTable;
-                            invalidTable.add_row({"Invalid type! Please enter letters and spaces only (no numbers or symbols)."});
+                            invalidTable.add_row({"         Invalid type! Please enter letters and spaces only (no numbers or symbols).        "});
                             invalidTable.format()
                                 .font_align(FontAlign::center)
                                 .font_style({FontStyle::bold})
@@ -273,7 +291,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                                 .border_left("|")
                                 .border_right("|")
                                 .corner("+");
-                            cout << invalidTable << endl;
+                            ostringstream oss;
+                            oss << invalidTable;
+                            cout << RED << oss.str() << RESET << endl;
                         }
                     }
                     pressEnter();
@@ -283,7 +303,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Search By Brand >> ]==============="});
+                    displayTable.add_row({"                     ===============[ << Search By Brand >> ]===============                "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -292,12 +312,15 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     string brand;
                     while (true)
                     {
-                        cout << "Enter brand to search: ";
+                        cout << MAGENTA << "|>> Enter brand to search: ";
                         getline(cin >> ws, brand);
+                        cout << RESET;
                         bool isValid = !brand.empty();
                         for (char c : brand)
                         {
@@ -315,7 +338,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         else
                         {
                             Table invalidTable;
-                            invalidTable.add_row({"Invalid brand! Please enter letters and spaces only (no numbers or symbols)."});
+                            invalidTable.add_row({"      Invalid brand! Please enter letters and spaces only (no numbers or symbols).          "});
                             invalidTable.format()
                                 .font_align(FontAlign::center)
                                 .font_style({FontStyle::bold})
@@ -324,7 +347,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                                 .border_left("|")
                                 .border_right("|")
                                 .corner("+");
-                            cout << invalidTable << endl;
+                            ostringstream oss;
+                            oss << invalidTable;
+                            cout << RED << oss.str() << RESET << endl;
                         }
                     }
                     pressEnter();
@@ -334,7 +359,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Search By Model >> ]==============="});
+                    displayTable.add_row({"                        ===============[ << Search By Model >> ]===============             "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -343,12 +368,15 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     string model;
                     while (true)
                     {
-                        cout << "Enter model to search: ";
+                        cout << MAGENTA << "|>> Enter model to search: ";
                         getline(cin >> ws, model);
+                        cout << RESET;
                         bool isValid = !model.empty();
                         for (char c : model)
                         {
@@ -366,7 +394,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         else
                         {
                             Table invalidTable;
-                            invalidTable.add_row({"Invalid model! Please enter letters and spaces only (no numbers or symbols)."});
+                            invalidTable.add_row({"        Invalid model! Please enter letters and spaces only (no numbers or symbols).        "});
                             invalidTable.format()
                                 .font_align(FontAlign::center)
                                 .font_style({FontStyle::bold})
@@ -375,7 +403,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                                 .border_left("|")
                                 .border_right("|")
                                 .corner("+");
-                            cout << invalidTable << endl;
+                            ostringstream oss;
+                            oss << invalidTable;
+                            cout << RED << oss.str() << RESET << endl;
                         }
                     }
                     pressEnter();
@@ -385,7 +415,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Filter By Year >> ]==============="});
+                    displayTable.add_row({"                    ===============[ << Filter By Year >> ]===============                  "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -394,13 +424,16 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     int year;
                     while (true)
                     {
-                        cout << "Enter year to filter: ";
+                        cout << MAGENTA << "|>> Enter year to filter: ";
                         if ((cin >> year) && year > 0)
                         {
+                            cout << RESET;
                             break;
                         }
                         else
@@ -429,7 +462,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Filter By Origin >> ]==============="});
+                    displayTable.add_row({"                ===============[ << Filter By Origin >> ]===============                    "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -438,12 +471,15 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     string origin;
                     while (true)
                     {
-                        cout << "Enter origin to filter: ";
+                        cout << MAGENTA << "|>> Enter origin to filter: ";
                         getline(cin >> ws, origin);
+                        cout << RESET;
                         bool isValid = !origin.empty();
                         for (char c : origin)
                         {
@@ -480,7 +516,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Filter By Quantity >> ]==============="});
+                    displayTable.add_row({"                ===============[ << Filter By Quantity >> ]===============                  "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -489,13 +525,16 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     int quantity;
                     while (true)
                     {
-                        cout << "Enter quantity to filter: ";
+                        cout << MAGENTA << "|>> Enter quantity to filter: ";
                         if ((cin >> quantity) && quantity > 0)
                         {
+                            cout << RESET;
                             break;
                         }
                         else
@@ -524,7 +563,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 {
                     clearScreen();
                     Table displayTable;
-                    displayTable.add_row({"===============[ << Filter By Price >> ]==============="});
+                    displayTable.add_row({"                    ===============[ << Filter By Price >> ]===============                 "});
                     displayTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -533,13 +572,16 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << displayTable << endl;
+                    ostringstream oss;
+                    oss << displayTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     double price;
                     while (true)
                     {
-                        cout << "Enter price to filter: ";
+                        cout << MAGENTA << "|>> Enter price to filter: ";
                         if ((cin >> price) && price > 0)
                         {
+                            cout << RESET;
                             break;
                         }
                         else
@@ -567,7 +609,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 case 9:
                 {
                     Table exitTable;
-                    exitTable.add_row({"Exit the case search & filter menu."});
+                    exitTable.add_row({"                                Exit the case search & filter menu.                         "});
                     exitTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -576,7 +618,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << exitTable << endl;
+                    ostringstream oss;
+                    oss << exitTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     cin.ignore();
                     pressEnter();
                     isStayInSearchAndFilterMenu = false;
@@ -585,7 +629,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 default:
                 {
                     Table warningTable;
-                    warningTable.add_row({"Invalid choice! Please select an option from the menu."});
+                    warningTable.add_row({"                    Invalid choice! Please select an option from the menu.                  "});
                     warningTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -594,7 +638,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << warningTable << endl;
+                    ostringstream oss;
+                    oss << warningTable;
+                    cout << RED << oss.str() << RESET << endl;
                     pressEnter();
                     break;
                 }
@@ -605,10 +651,8 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         case 4:
         {
             clearScreen();
-            system("cls");
-            system("clear");
             Table updateTable;
-            updateTable.add_row({"===============[ << Update Records >> ]==============="});
+            updateTable.add_row({"                    ===============[ << Update Records >> ]===============                  "});
             updateTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -617,7 +661,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << updateTable << endl;
+            ostringstream oss;
+            oss << updateTable;
+            cout << BLUE << oss.str() << RESET << endl;
             stockManager.updateRecord();
             cin.ignore();
             pressEnter();
@@ -626,10 +672,8 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         case 5:
         {
             clearScreen();
-            system("cls");
-            system("clear");
             Table deleteTable;
-            deleteTable.add_row({"===============[ << Delete Records >> ]==============="});
+            deleteTable.add_row({"                ===============[ << Delete Records >> ]===============                      "});
             deleteTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -638,7 +682,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << deleteTable << endl;
+            ostringstream oss;
+            oss << deleteTable;
+            cout << BLUE << oss.str() << RESET << endl;
             stockManager.deleteRecord();
             cin.ignore();
             pressEnter();
@@ -647,15 +693,14 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         case 6:
         {
             clearScreen();
-            system("cls");
-            system("clear");
             bool isStayInSortMenu = true;
             while (isStayInSortMenu)
             {
                 clearScreen();
                 int subChoice;
                 Table sortMenu;
-                sortMenu.add_row({"===============[ << Sort Menu >> ]==============="});
+                sortMenu.add_row({"                        ===============[ << Sort Menu >> ]===============                   "});
+                sortMenu[0].format().font_align(FontAlign::center).font_style({FontStyle::bold});
                 sortMenu.add_row({"1. Sort Ascending by ID"});
                 sortMenu.add_row({"2. Sort Descending by ID"});
                 sortMenu.add_row({"3. Sort Ascending by Type"});
@@ -680,12 +725,15 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                     .border_left("|")
                     .border_right("|")
                     .corner("+");
-                cout << sortMenu << endl;
-                cout << "Choose an option from [1-17]: ";
+                ostringstream oss;
+                oss << sortMenu;
+                cout << BLUE << oss.str() << RESET << endl;
+                cout << MAGENTA << "|>> Choose an option from [1-17]: ";
                 if (!(cin >> subChoice) || subChoice < 1 || subChoice > 17)
                 {
+                    cout << RESET;
                     Table invalidTable;
-                    invalidTable.add_row({"Invalid input! Please enter a number from 1 to 17."});
+                    invalidTable.add_row({"Invalid input! Please enter a number from 1 to 17.                                          "});
                     invalidTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -694,7 +742,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << invalidTable << endl;
+                    ostringstream oss;
+                    oss << invalidTable;
+                    cout << RED << oss.str() << RESET << endl;
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 }
@@ -831,7 +881,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 case 17:
                 {
                     Table exitTable;
-                    exitTable.add_row({"Exit the case sort menu."});
+                    exitTable.add_row({"                                    Exit the case sort menu.                                "});
                     exitTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -840,7 +890,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << exitTable << endl;
+                    ostringstream oss;
+                    oss << exitTable;
+                    cout << BLUE << oss.str() << RESET << endl;
                     cin.ignore();
                     pressEnter();
                     isStayInSortMenu = false;
@@ -849,7 +901,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 default:
                 {
                     Table warningTable;
-                    warningTable.add_row({"Invalid choice! Please select an option from the menu."});
+                    warningTable.add_row({"    Invalid choice! Please select an option from the menu.                                  "});
                     warningTable.format()
                         .font_align(FontAlign::center)
                         .font_style({FontStyle::bold})
@@ -858,7 +910,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                         .border_left("|")
                         .border_right("|")
                         .corner("+");
-                    cout << warningTable << endl;
+                    ostringstream oss;
+                    oss << warningTable;
+                    cout << RED << oss.str() << RESET << endl;
                     pressEnter();
                     break;
                 }
@@ -869,10 +923,8 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         case 7:
         {
             clearScreen();
-            system("cls");
-            system("clear");
             Table viewUsersTable;
-            viewUsersTable.add_row({"===============[ << View All Customers Feature Placeholder >> ]==============="});
+            viewUsersTable.add_row({"===============[ << View All Customers Feature Placeholder >> ]===============              "});
             viewUsersTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -881,7 +933,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << viewUsersTable << endl;
+            ostringstream oss;
+            oss << viewUsersTable;
+            cout << BLUE << oss.str() << RESET << endl;
             stockManager.viewAllCustomers(stockManager.getUsers());
             cin.ignore();
             pressEnter();
@@ -890,10 +944,8 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         case 8:
         {
             clearScreen();
-            system("cls");
-            system("clear");
             Table deleteUsersTable;
-            deleteUsersTable.add_row({"===============[ << Delete Customer Feature Placeholder >> ]==============="});
+            deleteUsersTable.add_row({"===============[ << Delete Customer Feature Placeholder >> ]===============                 "});
             deleteUsersTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -902,7 +954,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << deleteUsersTable << endl;
+            ostringstream oss;
+            oss << deleteUsersTable;
+            cout << BLUE << oss.str() << RESET << endl;
             stockManager.deleteCustomer(passwordMap);
             pressEnter();
             break;
@@ -918,7 +972,7 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
         case 10:
         {
             Table exitTable;
-            exitTable.add_row({"Exit the Program."});
+            exitTable.add_row({"                                    Exit the Program.                                       "});
             exitTable.format()
                 .font_align(FontAlign::center)
                 .font_style({FontStyle::bold})
@@ -927,7 +981,9 @@ void showAdminMenu(StockManager &stockManager, bool &isRunning, unordered_map<st
                 .border_left("|")
                 .border_right("|")
                 .corner("+");
-            cout << exitTable << endl;
+            ostringstream oss;
+            oss << exitTable;
+            cout << BLUE << oss.str() << RESET << endl;
             cin.ignore();
             pressEnter();
             isRunning = false;

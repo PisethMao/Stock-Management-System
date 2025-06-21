@@ -167,11 +167,11 @@ int main()
             passwordMap[user.getUsername()] = user.getPassword();
         }
         StockManager stockManager;
-        stockManager.setUsers(users);
         User *currentUser = nullptr;
         while (currentUser == nullptr)
         {
             currentUser = login(users, passwordMap);
+            stockManager.setUsers(users);
             exportUsersToExcel(users);
         }
         welcomeMessage(currentUser);
