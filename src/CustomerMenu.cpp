@@ -27,8 +27,9 @@ void showCustomerMenu()
         customerMenu.add_row({"2. Search Products"});
         customerMenu.add_row({"3. Sort/Filter Products"});
         customerMenu.add_row({"4. Buy Product"});
-        customerMenu.add_row({"5. Logout"});
-        customerMenu.add_row({"6. Exit Program"});
+        customerMenu.add_row({"5. Show Purchase History"});
+        customerMenu.add_row({"6. Logout"});
+        customerMenu.add_row({"7. Exit Program"});
         customerMenu.format()
             .font_align(FontAlign::left)
             .border_top("-")
@@ -41,8 +42,8 @@ void showCustomerMenu()
         cout << BLUE << oss.str() << RESET << endl;
         while (true)
         {
-            cout << MAGENTA << "|>> Choose your choice from [1-6]: ";
-            if (cin >> choice && choice >= 1 && choice <= 6)
+            cout << MAGENTA << "|>> Choose your choice from [1-7]: ";
+            if (cin >> choice && choice >= 1 && choice <= 7)
             {
                 cout << RESET;
                 break;
@@ -50,7 +51,7 @@ void showCustomerMenu()
             else
             {
                 Table invalidTable;
-                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 6."});
+                invalidTable.add_row({"Invalid input! Please enter a number from 1 to 7."});
                 invalidTable.format()
                     .font_align(FontAlign::center)
                     .font_style({FontStyle::bold})
@@ -91,12 +92,15 @@ void showCustomerMenu()
             break;
         }
         case 5:
+            showPurchaseHistory();
+            break;
+        case 6:
         {
             logout();
             isStayInMenu = false;
             break;
         }
-        case 6:
+        case 7:
         {
             Table exitTable;
             exitTable.add_row({"                   Exit the Program.             "});
