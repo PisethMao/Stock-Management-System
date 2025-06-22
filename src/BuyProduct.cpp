@@ -160,6 +160,30 @@ void buyProduct(StockManager &manager)
         pressEnterToContinue();
         return;
     }
+
+    if (it->quantity == 0)
+    {
+        string outOfStockMsg = "                     The selected product is currently out of stock.                       ";
+        Table outOfStockTable;
+        outOfStockTable.add_row({outOfStockMsg});
+        outOfStockTable.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+
+        ostringstream ossOut;
+        ossOut << outOfStockTable;
+        cout << RED << ossOut.str() << RESET << endl;
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        pressEnterToContinue();
+        return;
+    }
+
     int quantity = -1;
     cout << MAGENTA << "|>> Enter quantity to buy (or 0 to cancel): ";
     while (!(cin >> quantity))
@@ -169,6 +193,7 @@ void buyProduct(StockManager &manager)
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << MAGENTA << "|>> Invalid input. Please enter a number: ";
     }
+
     if (quantity == 0)
     {
         Table purchaseTable;
@@ -188,9 +213,10 @@ void buyProduct(StockManager &manager)
         pressEnterToContinue();
         return;
     }
+
     if (quantity < 0 || quantity > it->quantity)
     {
-        string invalidQuantity = "                 Invalid quantity. Only " + to_string(it->quantity) + "available.                                        ";
+        string invalidQuantity = "                 Invalid quantity. Only " + to_string(it->quantity) + " available.                                        ";
         Table quantityTable;
         quantityTable.add_row({invalidQuantity});
         quantityTable.format()
