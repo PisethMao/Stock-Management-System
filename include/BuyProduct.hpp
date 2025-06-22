@@ -8,3 +8,4 @@ using namespace std;
 using namespace tabulate;
 void buyProduct(StockManager &stockManager);
 void savePurchaseHistory(const StockItem &item, int quantity, double total);
+void showPurchaseHistory();

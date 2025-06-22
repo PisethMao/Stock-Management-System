@@ -20,7 +20,7 @@ using namespace tabulate;
 void pressEnterToContinue()
 {
     Table pressTable;
-    pressTable.add_row({"                                             Press Enter to return...                      "});
+    pressTable.add_row({"                                                       Press Enter to return...                                      "});
     pressTable.format()
         .font_align(FontAlign::center)
         .font_style({FontStyle::bold})
@@ -29,10 +29,13 @@ void pressEnterToContinue()
         .border_left("|")
         .border_right("|")
         .corner("+");
+
     ostringstream oss;
     oss << pressTable;
     cout << WHITE << oss.str() << RESET << endl;
-    cin.get();
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+    cin.get();                                          
 }
 string priceFormat(double price)
 {
@@ -350,4 +353,76 @@ void savePurchaseHistory(const StockItem &item, int quantity, double total)
     ws.column_properties("J").width = 25;
     ws.column_properties("D").width = 25;
     wb.save(filename);
+}
+
+void showPurchaseHistory()
+{
+    clearScreen();
+    string filename = "buy_history.xlsx";
+    if (!filesystem::exists(filename))
+    {
+        Table noFile;
+        noFile.add_row({"                          No purchase history found.                          "});
+        noFile.format()
+            .font_align(FontAlign::center)
+            .font_style({FontStyle::bold})
+            .border_top("-")
+            .border_bottom("-")
+            .border_left("|")
+            .border_right("|")
+            .corner("+");
+        cout << RED << noFile << RESET << endl;
+        pressEnterToContinue();
+        return;
+    }
+
+    xlnt::workbook wb;
+    wb.load(filename);
+    xlnt::worksheet ws = wb.active_sheet();
+    Table titleTable;
+    titleTable.add_row({"                                                     === Show Purchase History ===                                   "});
+    titleTable.format()
+        .font_align(FontAlign::center)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+    ostringstream oss;
+    oss << titleTable;
+    cout << BLUE << oss.str() << RESET << endl;
+    Table historyTable;
+    historyTable.add_row({"ID", "Type", "Brand", "Model", "Year", "Origin",
+                          "Quantity", "Unit Price", "Total Price", "Purchase Date"});
+    historyTable[0].format().font_style({FontStyle::bold}).font_align(FontAlign::center);
+
+    for (auto row : ws.rows(false))
+    {
+        if (row[0].row() == 1)
+            continue; // Skip header row
+
+        tabulate::Table::Row_t tabulateRow;
+        for (const auto &cell : row)
+        {
+            if (cell.has_value())
+                tabulateRow.push_back(cell.to_string());
+            else
+                tabulateRow.push_back("");
+        }
+
+        historyTable.add_row(tabulateRow);
+    }
+
+    historyTable.format()
+        .font_align(FontAlign::left)
+        .font_style({FontStyle::bold})
+        .border_top("-")
+        .border_bottom("-")
+        .border_left("|")
+        .border_right("|")
+        .corner("+");
+
+    cout << BLUE << historyTable << RESET << endl;
+    pressEnterToContinue();
 }
